@@ -20,14 +20,29 @@ use App\Http\Controllers\Controller;
 class PurchaseController extends Controller
 {
     // Show all share packages
-    public function index()
-    {
-        $packages = Package::where('status', 'active')
-            ->orderBy('id', 'ASC')
-            ->get();
+public function index()
+{
+    $user = auth()->user();
 
-        return view('user.pages.package.index', compact('packages'));
-    }
+    $packages = Package::where('status', 'active')
+        ->orderBy('id', 'ASC')
+        ->get()
+        ->map(function ($package) use ($user) {
+            // How many shares user already purchased
+            $package->user_purchased = Investor::where('user_id', $user->id)
+                ->where('package_id', $package->id)
+                ->sum('quantity');
+            // How many more he can buy
+            $package->user_remaining = $package->per_purchase_limit - $package->user_purchased;
+
+            if ($package->user_remaining < 0) $package->user_remaining = 0;
+
+            return $package;
+        });
+
+    return view('user.pages.package.index', compact('packages'));
+}
+
 
     // Purchase function
 public function purchase(Request $request)
@@ -42,8 +57,16 @@ public function purchase(Request $request)
     $package = Package::findOrFail($request->package_id);
     $quantity = $request->quantity;
 
+    $totalPurchased = Investor::where('user_id', $user->id)->where('package_id', $package->id)->sum('quantity');
+
+    $newTotal = $totalPurchased + $quantity;
+
+    if ($newTotal > $package->per_purchase_limit) {
+        return back()->with('error', 'You have reached the maximum purchase limit of '.$package->per_purchase_limit.' shares for this package.');
+    }
+
     if ($quantity > $package->per_purchase_limit) {
-        return back()->with('error', 'You cannot buy more than '.$package->per_purchase_limit.' shares.');
+        return back()->with('error', 'You cannot buy more than '.$package->per_purchase_limit.' shares at once.');
     }
 
     $totalAmount = $package->amount * $quantity;
@@ -87,8 +110,6 @@ public function purchase(Request $request)
     });
 }
 
-
-
     /**
      * Full Payment
      */
@@ -105,7 +126,7 @@ public function purchase(Request $request)
         $investor->save();
 
         Invoice::create([
-            'invoice_no' => Str::uuid(),
+            'invoice_no' => 'INV-' . Str::upper(Str::random(6)),
             'user_id' => $user->id,
             'investor_id' => $investor->id,
             'amount' => $amount,
@@ -139,7 +160,7 @@ public function purchase(Request $request)
         $investor->save();
 
         Invoice::create([
-            'invoice_no' => Str::uuid(),
+            'invoice_no' => 'INV-' . Str::upper(Str::random(6)),
             'user_id' => $user->id,
             'investor_id' => $investor->id,
             'amount' => $firstInstallment,
@@ -271,221 +292,211 @@ public function purchase(Request $request)
         return view('user.pages.package.invoice', compact('invoices'));
     }
     // invoice pay
-public function payInvoice($id)
-{
-    $invoice = Invoice::where('id', $id)
-        ->where('user_id', auth()->id())
-        ->where('status', 'pending')
-        ->firstOrFail();
+    public function payInvoice($id)
+    {
+        $invoice = Invoice::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->where('status', 'pending')
+            ->firstOrFail();
 
-    $user = auth()->user();
-    $investor = $invoice->investor;
+        $user = auth()->user();
+        $investor = $invoice->investor;
 
-    $settings = BonusSetting::first();
-    $reactivationCharge = $settings->reactivation_charge;
+        $settings = BonusSetting::first();
+        $reactivationCharge = $settings->reactivation_charge;
 
-    // Get all pending invoices for THIS investor
-    $pendingInvoices = Invoice::where('investor_id', $investor->id)
-        ->where('status', 'pending')
-        ->get();
-
-    $totalPendingAmount = $pendingInvoices->sum('amount');
-
-    // Total payable
-    $totalPaymentRequired = $totalPendingAmount;
-
-    // If inactive → add reactivation charge
-    if ($investor->status === 'inactive') {
-        $totalPaymentRequired += $reactivationCharge;
-    }
-
-    // Wallet check
-    if ($user->funding_wallet < $totalPaymentRequired) {
-        return back()->with('error', 'Insufficient balance. You must pay all pending installments plus reactivation charge.');
-    }
-
-    DB::beginTransaction();
-    try {
-
-        // Deduct wallet balance
-        $user->funding_wallet -= $totalPaymentRequired;
-        $user->save();
-
-        // If inactive → Reactivate and log
-        if ($investor->status === 'inactive') {
-            ReactivationLog::create([
-                'investor_id'   => $investor->id,
-                'user_id'       => $user->id,
-                'charge_amount' => $reactivationCharge,
-                'total_paid'    => $totalPaymentRequired,
-            ]);
-
-            $investor->status = 'active';
-            $investor->save();
-        }
-
-        // Pay all pending invoices
-        foreach ($pendingInvoices as $pending) {
-            $pending->status = 'paid';
-            $pending->save();
-
-            // Update investor payments
-            $investor->paid_installments += 1;
-            $investor->paid_amount += $pending->amount;
-
-            // ******** Generate Level Bonus ********
-            $this->levelBonus($user, $investor, $pending->amount);
-
-            // ******** Generate Pool Bonus ********
-            $this->poolBonus($pending->amount);
-        }
-
-        // ------------------- Update Investor Status -------------------
-        if ($investor->paid_amount >= $investor->total_amount) {
-            $investor->status = 'paid';
-        } elseif ($investor->status === 'inactive') {
-            $investor->status = 'inactive';
-        } else {
-            $investor->status = 'active';
-        }
-
-        $investor->save();
-
-        DB::commit();
-
-        return back()->with('success','Invoices paid successfully! Bonuses added.');
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return back()->with('error', 'Error: '.$e->getMessage());
-    }
-}
-
-
-public function payAnyAmount(Request $request, $investorId)
-{
-    $request->validate([
-        'amount' => 'required|numeric|min:1',
-    ]);
-
-    $user = auth()->user();
-    $investor = Investor::where('id', $investorId)
-        ->where('user_id', $user->id)
-        ->firstOrFail();
-
-    $payAmount = (float) $request->amount;
-    $settings = BonusSetting::first();
-    $reactivationCharge = $settings->reactivation_charge;
-
-    // Remaining amount + Reactivation (if inactive)
-    $remaining = $investor->total_amount - $investor->paid_amount;
-    if ($investor->status === 'inactive') {
-        $remaining += $reactivationCharge;
-    }
-
-    if ($payAmount > $remaining) {
-        return back()->with('error', 'You cannot pay more than remaining amount: '.$remaining);
-    }
-
-    DB::transaction(function () use ($user, $investor, &$payAmount, $reactivationCharge) {
-
-        // 🔹 Wallet check (total needed)
-        $totalRequired = $payAmount;
-        if ($investor->status === 'inactive') {
-            $totalRequired += $reactivationCharge;
-        }
-        if ($user->funding_wallet < $totalRequired) {
-            throw new \Exception('Insufficient wallet balance.');
-        }
-
-        // Deduct total
-        $user->funding_wallet -= $totalRequired;
-        $user->save();
-
-        // 🔹 Handle Reactivation fee
-        if ($investor->status === 'inactive') {
-            ReactivationLog::create([
-                'investor_id'   => $investor->id,
-                'user_id'       => $user->id,
-                'charge_amount' => $reactivationCharge,
-                'total_paid'    => $reactivationCharge,
-            ]);
-
-            $investor->status = 'active';
-            $investor->save();
-
-            $payAmount -= $reactivationCharge;
-        }
-
-        // 🔹 Pay pending invoices first
+        // Get all pending invoices for THIS investor
         $pendingInvoices = Invoice::where('investor_id', $investor->id)
             ->where('status', 'pending')
-            ->orderBy('id', 'ASC')
             ->get();
 
-        foreach ($pendingInvoices as $invoice) {
-            if ($payAmount <= 0) break;
+        $totalPendingAmount = $pendingInvoices->sum('amount');
 
-            if ($payAmount < $invoice->amount) break; // partial not allowed
+        // Total payable
+        $totalPaymentRequired = $totalPendingAmount;
 
-            $invoice->status = 'paid';
-            $invoice->save();
-
-            $investor->paid_installments += 1;
-            $investor->paid_amount += $invoice->amount;
-            $investor->save();
-
-            $this->levelBonus($user, $investor, $invoice->amount);
-            $this->poolBonus($invoice->amount);
-
-            $payAmount -= $invoice->amount;
+        // If inactive → add reactivation charge
+        if ($investor->status === 'inactive') {
+            $totalPaymentRequired += $reactivationCharge;
         }
 
-        // 🔹 Create advance invoice if any leftover
-        if ($payAmount > 0) {
-            Invoice::create([
-                'invoice_no' => Str::uuid(),
-                'user_id' => $user->id,
-                'investor_id' => $investor->id,
-                'amount' => $payAmount,
-                'type' => 'installment',
-                'status' => 'paid'
-            ]);
-
-            $investor->paid_installments += 1;
-            $investor->paid_amount += $payAmount;
-            $investor->save();
-
-            $this->levelBonus($user, $investor, $payAmount);
-            $this->poolBonus($payAmount);
+        // Wallet check
+        if ($user->funding_wallet < $totalPaymentRequired) {
+            return back()->with('error', 'Insufficient balance. You must pay all pending installments plus reactivation charge.');
         }
 
-        // 🔹 Update final status
-        if ($investor->paid_amount >= $investor->total_amount) {
-            $investor->status = 'paid';
+        DB::beginTransaction();
+        try {
+
+            // Deduct wallet balance
+            $user->funding_wallet -= $totalPaymentRequired;
+            $user->save();
+
+            // If inactive → Reactivate and log
+            if ($investor->status === 'inactive') {
+                ReactivationLog::create([
+                    'investor_id'   => $investor->id,
+                    'user_id'       => $user->id,
+                    'charge_amount' => $reactivationCharge,
+                    'total_paid'    => $totalPaymentRequired,
+                ]);
+
+                $investor->status = 'active';
+                $investor->save();
+            }
+
+            // Pay all pending invoices
+            foreach ($pendingInvoices as $pending) {
+                $pending->status = 'paid';
+                $pending->save();
+
+                // Update investor payments
+                $investor->paid_installments += 1;
+                $investor->paid_amount += $pending->amount;
+
+                // ******** Generate Level Bonus ********
+                $this->levelBonus($user, $investor, $pending->amount);
+
+                // ******** Generate Pool Bonus ********
+                $this->poolBonus($pending->amount);
+            }
+
+            // ------------------- Update Investor Status -------------------
+            if ($investor->paid_amount >= $investor->total_amount) {
+                $investor->status = 'paid';
+            } elseif ($investor->status === 'inactive') {
+                $investor->status = 'inactive';
+            } else {
+                $investor->status = 'active';
+            }
+
             $investor->save();
 
-            Invoice::where('investor_id', $investor->id)
+            DB::commit();
+
+            return back()->with('success','Invoices paid successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error: '.$e->getMessage());
+        }
+    }
+
+    public function payAnyAmount(Request $request, $investorId)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+        ]);
+
+        $user = auth()->user();
+        $investor = Investor::where('id', $investorId)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $payAmount = (float) $request->amount;
+        $settings = BonusSetting::first();
+        $reactivationCharge = $settings->reactivation_charge;
+
+        // Remaining amount + Reactivation (if inactive)
+        $remaining = $investor->total_amount - $investor->paid_amount;
+        if ($investor->status === 'inactive') {
+            $remaining += $reactivationCharge;
+        }
+
+        if ($payAmount > $remaining) {
+            return back()->with('error', 'You cannot pay more than remaining amount: '.$remaining);
+        }
+
+        DB::transaction(function () use ($user, $investor, &$payAmount, $reactivationCharge) {
+
+            // 🔹 Wallet check (total needed)
+            $totalRequired = $payAmount;
+            if ($investor->status === 'inactive') {
+                $totalRequired += $reactivationCharge;
+            }
+            if ($user->funding_wallet < $totalRequired) {
+                throw new \Exception('Insufficient wallet balance.');
+            }
+
+            // Deduct total
+            $user->funding_wallet -= $totalRequired;
+            $user->save();
+
+            // 🔹 Handle Reactivation fee
+            if ($investor->status === 'inactive') {
+                ReactivationLog::create([
+                    'investor_id'   => $investor->id,
+                    'user_id'       => $user->id,
+                    'charge_amount' => $reactivationCharge,
+                    'total_paid'    => $reactivationCharge,
+                ]);
+
+                $investor->status = 'active';
+                $investor->save();
+
+                $payAmount -= $reactivationCharge;
+            }
+
+            // Pay pending invoices first
+            $pendingInvoices = Invoice::where('investor_id', $investor->id)
                 ->where('status', 'pending')
-                ->update(['status' => 'paid', 'updated_at' => now()]);
-        } else {
-            $investor->status = 'active';
-            $investor->save();
-        }
+                ->orderBy('id', 'ASC')
+                ->get();
 
-    });
+            foreach ($pendingInvoices as $invoice) {
+                if ($payAmount <= 0) break;
 
-    return back()->with('success', 'Payment completed successfully! Bonuses updated.');
-}
+                if ($payAmount < $invoice->amount) break;
 
+                $invoice->status = 'paid';
+                $invoice->save();
 
+                $investor->paid_installments += 1;
+                $investor->paid_amount += $invoice->amount;
+                $investor->save();
 
+                $this->levelBonus($user, $investor, $invoice->amount);
+                $this->poolBonus($invoice->amount);
 
+                $payAmount -= $invoice->amount;
+            }
 
+            // 🔹 Create advance invoice if any leftover
+            if ($payAmount > 0) {
+                Invoice::create([
+                    'invoice_no' => 'INV-' . Str::upper(Str::random(6)),
+                    'user_id' => $user->id,
+                    'investor_id' => $investor->id,
+                    'amount' => $payAmount,
+                    'type' => 'installment',
+                    'status' => 'paid'
+                ]);
 
+                $investor->paid_installments += 1;
+                $investor->paid_amount += $payAmount;
+                $investor->save();
 
+                $this->levelBonus($user, $investor, $payAmount);
+                $this->poolBonus($payAmount);
+            }
 
+            // 🔹 Update final status
+            if ($investor->paid_amount >= $investor->total_amount) {
+                $investor->status = 'paid';
+                $investor->save();
 
+                Invoice::where('investor_id', $investor->id)
+                    ->where('status', 'pending')
+                    ->update(['status' => 'paid', 'updated_at' => now()]);
+            } else {
+                $investor->status = 'active';
+                $investor->save();
+            }
+
+        });
+
+        return back()->with('success', 'Payment completed successfully.');
+    }
 
     public function myInvestments()
     {

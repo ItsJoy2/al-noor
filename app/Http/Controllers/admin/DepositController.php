@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\Deposit;
 use App\Models\Transactions;
-use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 
 class DepositController extends Controller
 {
@@ -15,7 +16,7 @@ class DepositController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Deposit::where('status', 1)->with('user');
+        $query = Deposit::with('user');
         if ($request->filled('search')) {
             $search = $request->input('search');
 
@@ -26,6 +27,10 @@ class DepositController extends Controller
                                 ->orWhere('email', 'LIKE', "%{$search}%");
                 });
             });
+        }
+        if ($request->filled('status')) {
+            $status = $request->input('status');
+            $query->where('status', $status);
         }
 
         $deposits = $query->paginate(10);
@@ -68,24 +73,56 @@ class DepositController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+
+
+    public function update(Request $request, $id)
     {
-        $status = $request->input('status');
-        $depositData = Transactions::where('id', $id)->first();
-        if($status == 'completed'){
-            $user = User::where('id', $depositData->user_id)->first();
-            $user->wallet = $user->wallet + $depositData->amount;
-            $user->save();
-            $depositData->status = 'Completed';
-            $depositData->save();
-            cache()->flush();
-            return back()->with('success', 'Updated Successfully');
+        $request->validate([
+            'status' => 'required|in:approved,rejected',
+            'note' => 'nullable|string',
+        ]);
+
+        $deposit = Deposit::find($id);
+
+        if (!$deposit) {
+            return redirect()->back()->with('error', 'Deposit not found.');
         }
 
-        $depositData->status = $status;
-        $depositData->save();
+        DB::beginTransaction();
 
+        try {
+            $deposit->status = $request->status;
+            $deposit->note = $request->note ?? $deposit->note;
+            $deposit->save();
+
+            DB::commit();
+
+            return redirect()->route('admin.deposit.index')->with('success', 'Deposit status updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', 'Failed to update deposit status. Please try again.');
+        }
     }
+
+    // public function update(Request $request, string $id)
+    // {
+    //     $status = $request->input('status');
+    //     $depositData = Transactions::where('id', $id)->first();
+    //     if($status == 'completed'){
+    //         $user = User::where('id', $depositData->user_id)->first();
+    //         $user->wallet = $user->wallet + $depositData->amount;
+    //         $user->save();
+    //         $depositData->status = 'Completed';
+    //         $depositData->save();
+    //         cache()->flush();
+    //         return back()->with('success', 'Updated Successfully');
+    //     }
+
+    //     $depositData->status = $status;
+    //     $depositData->save();
+
+    // }
 
     /**
      * Remove the specified resource from storage.

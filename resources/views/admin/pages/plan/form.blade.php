@@ -62,14 +62,6 @@
     @enderror
 </div>
 
-<div class="form-group">
-    <label>Activation Charge (৳)</label>
-    <input type="number" step="0.01" name="activation_charge" class="form-control @error('activation_charge') is-invalid @enderror"
-           value="{{ old('activation_charge', isset($plan) ? number_format((float)$plan->activation_charge, 2, '.', '') : '0.00') }}">
-    @error('activation_charge')
-        <span class="invalid-feedback">{{ $message }}</span>
-    @enderror
-</div>
 
 <div class="form-group">
     <label>Status</label>

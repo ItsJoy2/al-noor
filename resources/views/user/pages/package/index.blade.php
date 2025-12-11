@@ -7,42 +7,82 @@
 
 @include('user.layouts.alert')
 
-<div class="row g-4">
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-body">
+            <div class="row justify-content-center g-4">
+                @foreach($packages as $package)
+                    <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="package-card w-100">
+                            <div class="package-title">{{ $package->share_name }}</div>
 
-    @foreach($packages as $package)
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
+<div class="price-tag">
+    ${{ number_format($package->amount, 2) }} <br>
+    <span class="text-gray" style="font-size: 12px; font-weight: 500;">(Installment Available)</span>
+</div>
 
-            <div class="card-body">
-                <h4 class="text-primary mb-3">{{ $package->share_name }}</h4>
 
-                <p><strong>Share Price:</strong> ${{ $package->amount }}</p>
-                <p><strong>Total Quantity:</strong> {{ $package->total_share_quantity }}</p>
-                <p><strong>User Max Purchase:</strong> {{ $package->per_purchase_limit }} Shares</p>
 
-                @if($package->first_installment > 0)
-                    <p><strong>First Installment:</strong> ${{ $package->first_installment }}</p>
-                    <p><strong>Monthly EMI:</strong> ${{ $package->monthly_installment }}</p>
-                    <p><strong>Total Months:</strong> {{ $package->installment_months }}</p>
-                @endif
+                            <hr style="border-top: 1px solid #ccc; margin: 1rem 0;">
 
-                <button class="btn btn-success w-100 mt-3 buyShareBtn"
-                        data-id="{{ $package->id }}"
-                        data-name="{{ $package->share_name }}"
-                        data-price="{{ $package->amount }}"
-                        data-limit="{{ $package->per_purchase_limit }}"
-                        data-first="{{ $package->first_installment }}"
-                        data-monthly="{{ $package->monthly_installment }}"
-                        data-months="{{ $package->installment_months }}">
-                    Buy Now
-                </button>
+                            <div class="stats-container mt-4">
+
+                                <div class="stat-item">
+                                    <span><i class="fas fa-layer-group"></i> Total Shares</span>
+                                    <span>{{ $package->total_share_quantity }} </span>
+                                </div>
+
+                                <div class="stat-item">
+                                    <span><i class="fas fa-user-check"></i> Max Purchase</span>
+                                    <span>{{ $package->per_purchase_limit }} Shares</span>
+                                </div>
+
+
+
+                                @if($package->first_installment > 0)
+
+                                    <div class="stat-item">
+                                        <span><i class="fas fa-hand-holding-usd"></i> First Installment</span>
+                                        <span>${{ number_format($package->first_installment, 2) }}</span>
+                                    </div>
+
+                                    <div class="stat-item">
+                                        <span><i class="fas fa-calendar-alt"></i> Monthly EMI</span>
+                                        <span>${{ number_format($package->monthly_installment, 2) }}</span>
+                                    </div>
+
+                                    <div class="stat-item">
+                                        <span><i class="fas fa-clock"></i> Duration</span>
+                                        <span>{{ $package->installment_months }} Months</span>
+                                    </div>
+
+                                @endif
+
+                            </div>
+
+                            <button type="button"
+                                class="btn btn-purchase w-100 buyShareBtn mt-3"
+                                data-id="{{ $package->id }}"
+                                data-name="{{ $package->share_name }}"
+                                data-price="{{ $package->amount }}"
+                                data-limit="{{ $package->per_purchase_limit }}"
+                                data-first="{{ $package->first_installment }}"
+                                data-monthly="{{ $package->monthly_installment }}"
+                                data-months="{{ $package->installment_months }}"
+                                data-remaining="{{ $package->user_remaining }}">
+                                Buy Now
+                            </button>
+
+                        </div>
+                    </div>
+                @endforeach
+
             </div>
 
         </div>
     </div>
-    @endforeach
-
 </div>
+
 
 {{-- Buy Share Modal --}}
 <div class="modal fade" id="buyShareModal" tabindex="-1" aria-hidden="true">
@@ -54,7 +94,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Buy Share</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close text-danger" data-bs-dismiss="modal">X</button>
                 </div>
 
                 <div class="modal-body">
@@ -63,13 +103,13 @@
 
                     <div class="mb-3">
                         <label>Quantity</label>
-                        <input type="number" min="1" class="form-control" name="quantity" id="modalQuantityInput">
+                        <input type="number" min="1" class="form-control bg-transparent text-light" name="quantity" id="modalQuantityInput">
                         <small id="modalQuantityLimit" class="text-muted"></small>
                     </div>
 
                     <div class="mb-3">
                         <label>Payment Type</label>
-                        <select name="purchase_type" id="paymentType" class="form-control">
+                        <select name="purchase_type" id="paymentType" class="form-control bg-dark text-light">
                             <option value="full">Full Payment</option>
                             <option value="installment">Installment</option>
                         </select>
@@ -108,31 +148,41 @@ document.addEventListener("DOMContentLoaded", function () {
             let name = this.dataset.name;
             let price = parseFloat(this.dataset.price);
             let limit = parseInt(this.dataset.limit);
+            let remaining = parseInt(this.dataset.remaining);
             let first = parseFloat(this.dataset.first);
             let monthly = parseFloat(this.dataset.monthly);
             let months = parseInt(this.dataset.months);
 
             document.getElementById("modalPackageId").value = id;
             document.getElementById("modalShareName").textContent = name;
-            document.getElementById("modalQuantityLimit").textContent = `Max ${limit} shares allowed`;
+
+            document.getElementById("modalQuantityLimit").textContent =
+                `Max ${limit} shares allowed — You can still buy ${remaining} shares`;
+
             document.getElementById("firstInstallmentText").textContent = first;
             document.getElementById("monthlyInstallmentText").textContent = monthly;
             document.getElementById("totalMonthsText").textContent = months;
+
             document.getElementById("modalQuantityInput").value = "";
+            document.getElementById("modalQuantityInput").max = remaining;
             document.getElementById("modalTotalAmount").textContent = "0.00";
             document.getElementById("installmentDetails").classList.add("d-none");
 
             modal.show();
 
-            // Quantity Input Change
+            // Quantity input event
             document.getElementById("modalQuantityInput").addEventListener("input", function () {
                 let qty = parseInt(this.value || 0);
-                if (qty > limit) qty = limit;
+
+                // Prevent entering more than remaining
+                if (qty > remaining) {
+                    this.value = remaining;
+                    qty = remaining;
+                }
 
                 let total = qty * price;
                 document.getElementById("modalTotalAmount").textContent = total.toFixed(2);
 
-                // Update Installment Display
                 document.getElementById("firstInstallmentText").textContent = (first * qty).toFixed(2);
                 document.getElementById("monthlyInstallmentText").textContent = (monthly * qty).toFixed(2);
             });
@@ -149,3 +199,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+

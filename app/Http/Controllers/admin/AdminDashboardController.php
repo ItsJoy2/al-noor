@@ -43,10 +43,10 @@ class AdminDashboardController extends Controller
                 'withdrawChargeAmount' => $withdrawChargeAmount,
 
                 // Investment
-                'totalInvestmentAmount'   => Investor::sum('amount'),
-                'runningInvestmentAmount' => Investor::where('status', 'running')->sum('amount'),
-                'canceledInvestmentAmount' => Investor::where('status', 'cancelled')->sum('amount'),
-                'expiredInvestmentAmount' => Investor::where('status', 'completed')->sum('amount'),
+                // 'totalInvestmentAmount'   => Investor::sum('amount'),
+                // 'runningInvestmentAmount' => Investor::where('status', 'running')->sum('amount'),
+                // 'canceledInvestmentAmount' => Investor::where('status', 'cancelled')->sum('amount'),
+                // 'expiredInvestmentAmount' => Investor::where('status', 'completed')->sum('amount'),
 
 
 

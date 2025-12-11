@@ -10,6 +10,7 @@ use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\WithdrawController;
 use App\Http\Controllers\admin\AdminTicketController;
 use App\Http\Controllers\admin\TransactionsController;
+use App\Http\Controllers\admin\DepositMethodController;
 use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\GeneralSettingsController;
 use App\Http\Controllers\admin\TransferSettingsController;
@@ -95,6 +96,16 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         'edit' => 'admin.deposit.edit',
         'update' => 'admin.deposit.update',
         'destroy' => 'admin.deposit.destroy'
+    ]);
+
+    Route::resource('deposit-methods', DepositMethodController::class)->names([
+        'index' => 'admin.deposit_methods.index',
+        'create' => 'admin.deposit_methods.create',
+        'store' => 'admin.deposit_methods.store',
+        'show' => 'admin.deposit_methods.show',
+        'edit' => 'admin.deposit_methods.edit',
+        'update' => 'admin.deposit_methods.update',
+        'destroy' => 'admin.deposit_methods.destroy'
     ]);
 
     // Category

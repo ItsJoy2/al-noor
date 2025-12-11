@@ -22,7 +22,7 @@ class DashboardController extends Controller
         $totalDeposit = Deposit::where('user_id', $user->id)->where('status', true)->sum('amount');
         $totalWithdraw = Transactions::where('user_id', $user->id)->where('remark', 'withdrawal')->sum('amount');
         $totalTransfer = Transactions::where('user_id', $user->id)->where('remark', 'transfer')->sum('amount');
-        $earningBalance = Transactions::where('user_id', $user->id) ->where('type', '+')->whereIn('remark', ['pnl_bonus', 'activation_bonus', 'trade_bonus', 'daily_pnl'])->sum('amount');
+        $bonusBalance = Transactions::where('user_id', $user->id) ->where('type', '+')->whereIn('remark', ['rank_bonus', 'director_bonus', 'club_bonus', 'shareholder_bonus'])->sum('amount');
 
 
         $activeReferrals = User::where('refer_by', $user->id)->where('is_active', 1)->latest()->take(4)->get();
@@ -107,7 +107,7 @@ class DashboardController extends Controller
             'totalDeposit' => $totalDeposit,
             'totalWithdraw'   => $totalWithdraw,
             'totalTransfer'   => $totalTransfer,
-            'earningBalance'  => $earningBalance,
+            'bonusBalance'  => $bonusBalance,
             'totalInvestment' => $totalInvestment,
             // 'runningInvestment' => $runningInvestment,
             // 'maturedInvestment' => $maturedInvestment,

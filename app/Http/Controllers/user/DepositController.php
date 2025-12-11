@@ -8,11 +8,13 @@ use GuzzleHttp\Client;
 use App\Models\Deposit;
 use App\Models\Transactions;
 use Illuminate\Http\Request;
+use App\Models\DepositMethod;
 use App\Models\UserWalletData;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Service\TransactionService;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 
@@ -23,113 +25,161 @@ class DepositController extends Controller
     {
         return view ('user.pages.deposit.index');
     }
-    public function showInvoice($invoice_id)
+
+     public function depositForm()
     {
-        // Fetch local deposit data using invoice_id (transaction_id)
-        $deposit = Deposit::where('transaction_id', $invoice_id)->first();
-
-        if (!$deposit) {
-            abort(404, "Deposit record not found.");
-        }
-
-        // Return view with only deposit data
-        return view('user.pages.deposit.invoice', [
-            'deposit' => $deposit,
-        ]);
+        $methods = DepositMethod::where('status', 1)->get();
+        return view ('user.pages.deposit.index', compact('methods'));
     }
 
-    public function Store(Request $request)
+    public function store(Request $request)
     {
-        $user = $request->user();
-
         $request->validate([
-            'wallet' => 'required',
+            'method_id' => 'required|exists:deposit_methods,id',
             'amount' => 'required|numeric|min:10',
+            'transaction_id' => 'nullable|string|max:255',
+            'note' => 'nullable|string',
         ]);
 
-        $client = new Client();
-
-        $headers = [
-            'x-api-key'      => '9S3WW3P-JRB43DN-PBCJ23E-P9W96H3',
-            'Content-Type'   => 'application/json',
-        ];
-
-        $payload = [
-            "amount"          => $request->amount,
-            "chain_id"        => 9996,
-            "type"            => "native",
-            "token_name"      => "MIND",
-            "user_id"         => 14,
-            // "contract_address"=> "0x55d398326f99059ff775485246999027b3197955",
-            "webhook_url"     => "https://yeeo.finance/api/deposit-check",
-        ];
-
-        $payment = $client->request('POST', 'https://evm.blockmaster.info/api/create_invoice', [
-            'headers' => $headers,
-            'json'    => $payload
+        Deposit::create([
+            'user_id' => Auth::id(),
+            'method_id' => $request->method_id,
+            'amount' => $request->amount,
+            'transaction_id' => $request->transaction_id,
+            'note' => $request->note,
+            'status' => 'pending',
         ]);
 
-        $response = json_decode($payment->getBody()->getContents(), true);
-
-
-        $deposit = new Deposit();
-        $deposit->user_id       = $user->id;
-        $deposit->amount        = $request->amount;
-        $deposit->wallet        = $request->wallet;
-        $deposit->transaction_id= $response['data']['invoice_id'];
-        $deposit->save();
-
-
-        return redirect()->route('user.deposit.invoice', ['invoice_id' => $response['data']['invoice_id']]);
-
-    }
-    public function webHook(Request $request){
-        $data = $request->input();
-
-        if (isset($data['status']) && ($data['status'] === true || $data['status'] === "completed")) {
-
-            $invoice = new Deposit();
-
-            $customerData = $invoice->where('transaction_id', $data['invoice_id'])->where('status', 0)->first();
-
-            if(!$customerData){
-                return "no data";
-            }
-
-            $customerData->amount = $data['amount'];
-            $customerData->status = 1;
-            $customerData->save();
-
-            $user = User::where('id', $customerData->user_id)->first();
-            if ($customerData->wallet == "funding"){
-                $user->funding_wallet += $data['amount'];
-                $user->save();
-
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Deposit added successfully.',
-                'deposit_id' => $customerData->id
-            ]);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Deposit not added, status is false.'
-        ]);
-    }
+        return back()->with('success', 'Deposit request submitted!');
     }
 
     public function history(Request $request)
     {
-        $user = $request->user();
+            $deposits = auth()->user()->deposits()
+        ->with('method')
+        ->latest()
+        ->paginate(10);
 
-        $deposits = Deposit::where('user_id', $user->id)
-            ->where('status', true)
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+    $deposits->transform(function($deposit) {
+        if($deposit->method && is_string($deposit->method->details)) {
+            $deposit->details = json_decode($deposit->method->details, true);
+        } else {
+            $deposit->details = $deposit->method->details ?? [];
+        }
+        return $deposit;
+    });
 
-        return view('user.pages.deposit.histories', compact('deposits'));
+        return view('user.pages.deposit.deposit-history', compact('deposits'));
     }
+
+
+    // public function showInvoice($invoice_id)
+    // {
+    //     // Fetch local deposit data using invoice_id (transaction_id)
+    //     $deposit = Deposit::where('transaction_id', $invoice_id)->first();
+
+    //     if (!$deposit) {
+    //         abort(404, "Deposit record not found.");
+    //     }
+
+    //     // Return view with only deposit data
+    //     return view('user.pages.deposit.invoice', [
+    //         'deposit' => $deposit,
+    //     ]);
+    // }
+
+    // public function Store(Request $request)
+    // {
+    //     $user = $request->user();
+
+    //     $request->validate([
+    //         'wallet' => 'required',
+    //         'amount' => 'required|numeric|min:10',
+    //     ]);
+
+    //     $client = new Client();
+
+    //     $headers = [
+    //         'x-api-key'      => '9S3WW3P-JRB43DN-PBCJ23E-P9W96H3',
+    //         'Content-Type'   => 'application/json',
+    //     ];
+
+    //     $payload = [
+    //         "amount"          => $request->amount,
+    //         "chain_id"        => 9996,
+    //         "type"            => "native",
+    //         "token_name"      => "MIND",
+    //         "user_id"         => 14,
+    //         // "contract_address"=> "0x55d398326f99059ff775485246999027b3197955",
+    //         "webhook_url"     => "https://yeeo.finance/api/deposit-check",
+    //     ];
+
+    //     $payment = $client->request('POST', 'https://evm.blockmaster.info/api/create_invoice', [
+    //         'headers' => $headers,
+    //         'json'    => $payload
+    //     ]);
+
+    //     $response = json_decode($payment->getBody()->getContents(), true);
+
+
+    //     $deposit = new Deposit();
+    //     $deposit->user_id       = $user->id;
+    //     $deposit->amount        = $request->amount;
+    //     $deposit->wallet        = $request->wallet;
+    //     $deposit->transaction_id= $response['data']['invoice_id'];
+    //     $deposit->save();
+
+
+    //     return redirect()->route('user.deposit.invoice', ['invoice_id' => $response['data']['invoice_id']]);
+
+    // }
+    // public function webHook(Request $request){
+    //     $data = $request->input();
+
+    //     if (isset($data['status']) && ($data['status'] === true || $data['status'] === "completed")) {
+
+    //         $invoice = new Deposit();
+
+    //         $customerData = $invoice->where('transaction_id', $data['invoice_id'])->where('status', 0)->first();
+
+    //         if(!$customerData){
+    //             return "no data";
+    //         }
+
+    //         $customerData->amount = $data['amount'];
+    //         $customerData->status = 1;
+    //         $customerData->save();
+
+    //         $user = User::where('id', $customerData->user_id)->first();
+    //         if ($customerData->wallet == "funding"){
+    //             $user->funding_wallet += $data['amount'];
+    //             $user->save();
+
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Deposit added successfully.',
+    //             'deposit_id' => $customerData->id
+    //         ]);
+    //     }
+
+    //     return response()->json([
+    //         'success' => false,
+    //         'message' => 'Deposit not added, status is false.'
+    //     ]);
+    // }
+    // }
+
+    // public function history(Request $request)
+    // {
+    //     $user = $request->user();
+
+    //     $deposits = Deposit::where('user_id', $user->id)
+    //         ->where('status', true)
+    //         ->orderBy('created_at', 'desc')
+    //         ->paginate(20);
+
+    //     return view('user.pages.deposit.histories', compact('deposits'));
+    // }
 
 }

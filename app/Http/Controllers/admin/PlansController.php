@@ -111,7 +111,7 @@ class PlansController extends Controller
             'status',
         ]));
 
-        return redirect()->route('admin.packages.index')
+        return redirect()->route('admin.plans.index')
                         ->with('success', 'Package updated successfully.');
     }
 

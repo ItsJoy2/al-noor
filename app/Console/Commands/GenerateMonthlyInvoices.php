@@ -67,7 +67,7 @@ class GenerateMonthlyInvoices extends Command
                 $invoiceAmount = min($defaultAmount, $remainingAmount);
 
                 Invoice::create([
-                    'invoice_no' => Str::uuid(),
+                    'invoice_no' => 'INV-' . Str::upper(Str::random(6)),
                     'user_id' => $investor->user_id,
                     'investor_id' => $investor->id,
                     'amount' => $invoiceAmount,
