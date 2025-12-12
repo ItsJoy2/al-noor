@@ -111,6 +111,46 @@
                   </div>
                 </div>
               </div>
+              <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                    <div class="row">
+                        <div class="col-9">
+                        <div class="d-flex align-items-center align-self-start">
+                            <h3 class="mb-0">{{ number_format($dashboard['totalSharesBought']) }}</h3>
+                        </div>
+                        </div>
+                        <div class="col-3">
+                        <div class="icon icon-box-primary">
+                            <span class="mdi mdi-chart-pie icon-item"></span>
+                        </div>
+                        </div>
+                    </div>
+                    <h6 class="text-muted font-weight-normal">Total Shares</h6>
+                    </div>
+                </div>
+                </div>
+                <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                        <div class="row">
+                            <div class="col-9">
+                            <div class="d-flex align-items-center align-self-start">
+                                <h3 class="mb-0">{{ number_format($dashboard['totalInstallmentShares']) }}</h3>
+                            </div>
+                            </div>
+                            <div class="col-3">
+                            <div class="icon icon-box-warning">
+                                <span class="mdi mdi-file-document-box-multiple icon-item"></span>
+                            </div>
+                            </div>
+                        </div>
+                        <h6 class="text-muted font-weight-normal">Installment Shares</h6>
+                        </div>
+                    </div>
+                    </div>
+
+
               {{-- <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">

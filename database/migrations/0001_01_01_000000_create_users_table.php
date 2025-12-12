@@ -26,7 +26,8 @@ return new class extends Migration
             $table->timestamp('last_activated_at')->nullable();
             $table->boolean('is_block')->default(false);
             $table->enum('rank', ['none','rank1','rank2','rank3'])->default('none');
-            $table->boolean('is_club')->default(false);
+            $table->enum('club', ['none', 'club1', 'club2', 'club3'])->default('none');
+            $table->boolean('is_shareholder')->default(false);
             $table->boolean('is_director')->default(false);
             $table->boolean('kyc_status')->default(false);
             $table->timestamp('email_verified_at')->nullable();

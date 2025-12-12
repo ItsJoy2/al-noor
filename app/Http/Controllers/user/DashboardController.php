@@ -83,6 +83,9 @@ class DashboardController extends Controller
 
             // $totalExpectedReturn = Investor::where('user_id', $user->id)->where('status', 'running')->sum('expected_return');
 
+            $totalSharesBought = Investor::where('user_id', $user->id)->sum('quantity');
+            $totalInstallmentShares = Investor::where('user_id', $user->id)->where('purchase_type', 'installment')->sum('quantity');
+
             $dates = collect(range(0, 29))->map(function ($days) use ($startDate)
             { return $startDate->copy()->addDays($days)->format('Y-m-d');
             })->toArray();
@@ -128,6 +131,8 @@ class DashboardController extends Controller
             'activeReferrals' => $activeReferrals,
             'inactiveReferrals' => $inactiveReferrals,
             // 'totalExpectedReturn' => $totalExpectedReturn,
+            'totalSharesBought' => $totalSharesBought,
+            'totalInstallmentShares' => $totalInstallmentShares,
 
          ];
 
