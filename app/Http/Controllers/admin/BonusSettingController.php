@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\admin;
 
+use App\Models\BonusSetting;
 use Illuminate\Http\Request;
-use App\Models\ActivationSetting;
 use App\Http\Controllers\Controller;
 
-class ActivationSettingController extends Controller
+class BonusSettingController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -45,8 +45,8 @@ class ActivationSettingController extends Controller
      */
     public function edit()
     {
-        $setting = ActivationSetting::first();
-        return view('admin.pages.settings.activation_settings', compact('setting'));
+        $bonus = BonusSetting::first();
+        return view('admin.pages.settings.bonus_settings', compact('bonus'));
     }
 
     /**
@@ -54,21 +54,11 @@ class ActivationSettingController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate([
-            'activation_amount' => 'required|numeric|min:0',
-            'activation_bonus' => 'required|numeric|min:0',
-            'referral_bonus' => 'required|numeric|min:0',
-            'activation_duration_months' => 'required|numeric|min:1',
-        ]);
+        $bonus = BonusSetting::first();
 
-        $setting = ActivationSetting::first();
-        if (!$setting) {
-            $setting = new ActivationSetting();
-        }
+        $bonus->update($request->all());
 
-        $setting->update($request->only(['activation_amount', 'activation_bonus', 'referral_bonus', 'activation_duration_months']));
-
-        return redirect()->back()->with('success', 'Settings updated successfully.');
+        return back()->with('success', 'Bonus Settings Updated Successfully!');
     }
 
     /**

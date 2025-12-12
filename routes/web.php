@@ -9,13 +9,13 @@ use App\Http\Controllers\admin\DepositController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\WithdrawController;
 use App\Http\Controllers\admin\AdminTicketController;
+use App\Http\Controllers\admin\BonusSettingController;
 use App\Http\Controllers\admin\TransactionsController;
 use App\Http\Controllers\admin\DepositMethodController;
 use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\GeneralSettingsController;
 use App\Http\Controllers\admin\TransferSettingsController;
 use App\Http\Controllers\admin\WithdrawSettingsController;
-use App\Http\Controllers\admin\ActivationSettingController;
 use App\Http\Controllers\admin\AuthenticatedSessionController;
 
 Route::get('/', function () {
@@ -131,9 +131,12 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('general-settings', [GeneralSettingsController::class, 'index'])->name('admin.general.settings');
     Route::post('general-settings', [GeneralSettingsController::class, 'update'])->name('admin.general.settings.update');
 
+    Route::get('settings', [GeneralSettingsController::class, 'settings'])->name('admin.settings');
+    Route::post('settings', [GeneralSettingsController::class, 'updateSettings'])->name('admin.settings.update');
+
     //Activation Settings
-    Route::get('activation-settings', [ActivationSettingController::class, 'edit'])->name('admin.activation-settings.edit');
-    Route::post('activation-settings', [ActivationSettingController::class, 'update'])->name('admin.activation-settings.update');
+    Route::get('activation-settings', [BonusSettingController::class, 'edit'])->name('admin.bonus-settings.edit');
+    Route::post('activation-settings', [BonusSettingController::class, 'update'])->name('admin.bonus-settings.update');
 
     //profile settings
 

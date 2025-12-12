@@ -60,21 +60,19 @@
                         <p>All Plans</p>
                     </a>
                 </li>
-                <!-- Pairs -->
-                <li class="nav-item {{ Str::contains(request()->path(), 'admin.categories.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.categories.index') }}">
-                        <i class="fas fa-puzzle-piece"></i>
-                        <p>Trading Pairs</p>
-                    </a>
-                </li>
                 <!-- Deposit -->
-                    <li class="nav-item {{ Str::contains(request()->path(), 'deposit') ? 'active' : '' }}">
-                    <a href="{{ route('admin.deposit.index') }}" class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="fas fa-money-check-alt"></i>
-                            <p class="m-0">Deposit</p>
-                        </div>
+                <li class="nav-item {{ Str::contains(request()->path(), 'deposit') ? 'active' : '' }}">
+                    <a data-bs-toggle="collapse" href="#deposit">
+                        <i class="fas fa-money-check-alt"></i>
+                        <p>Deposit</p>
+                        <span class="caret"></span>
                     </a>
+                    <div class="collapse" id="deposit">
+                        <ul class="nav nav-collapse">
+                            <li clsas="{{ Str::contains(request()->path(), 'settings') ? 'active' : '' }}"><a href="{{ route('admin.deposit.index') }}"><span class="sub-item">All Deposits</span></a></li>
+                            <li><a href="{{ route('admin.deposit_methods.index') }}"><span class="sub-item">Deposit methods</span></a></li>
+                        </ul>
+                    </div>
                 </li>
 
                 <!-- Withdraw -->
@@ -172,14 +170,14 @@
                     </a>
                     <div class="collapse" id="settings">
                         <ul class="nav nav-collapse">
-                            <li clsas="{{ Str::contains(request()->path(), 'settings') ? 'active' : '' }}"><a href="{{ route('admin.activation-settings.edit') }}"><span class="sub-item">Activation Setting</span></a></li>
+                            <li clsas="{{ Str::contains(request()->path(), 'settings') ? 'active' : '' }}"><a href="{{ route('admin.bonus-settings.edit') }}"><span class="sub-item">Bonus Setting</span></a></li>
+                            <li><a href="{{ route('admin.settings') }}"><span class="sub-item">Referral Settings</span></a></li>
                             <li><a href="{{ route('admin.withdraw.settings') }}"><span class="sub-item">Withdraws Settings</span></a></li>
                             <li><a href="{{ route('admin.transfer.settings') }}"><span class="sub-item">Transfer Settings</span></a></li>
-                            <li><a href="{{ route('admin.general.settings') }}"><span class="sub-item">General Settings</span></a></li>
+                            <li><a href="{{ route('admin.general.settings') }}"><span class="sub-item">App Settings</span></a></li>
                         </ul>
                     </div>
                 </li>
-
             </ul>
         </div>
     </div>

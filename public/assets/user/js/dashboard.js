@@ -94,7 +94,7 @@
           ctx.textBaseline = "middle";
           ctx.fillStyle = "#ffffff";
 
-          var text = "$" + (window.transactionTotalAmount || 0).toLocaleString(),
+          var text = "৳" + (window.transactionTotalAmount || 0).toLocaleString(),
 
               textX = Math.round((width - ctx.measureText(text).width) / 2),
               textY = height / 2.4;

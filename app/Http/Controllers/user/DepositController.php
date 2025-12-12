@@ -24,7 +24,7 @@ class DepositController extends Controller
     public function index()
     {
         $methods = DepositMethod::where('status', 1)->get();
-        return view ('user.pages.deposit.index', compact('methods'));
+        return view ('user.pages.deposit.deposit-form', compact('methods'));
     }
 
     public function store(Request $request)

@@ -24,14 +24,14 @@
         @csrf
 
         <div class="mb-3">
-            <label for="min_transfer" class="form-label">Minimum Transfer Amount ($)</label>
+            <label for="min_transfer" class="form-label">Minimum Transfer Amount (৳)</label>
             <input type="number" step="0.01" name="min_transfer" id="min_transfer"
                    value="{{ old('min_transfer', $settings->min_transfer) }}"
                    class="form-control" required>
         </div>
 
         <div class="mb-3">
-            <label for="max_transfer" class="form-label">Maximum Transfer Amount ($)</label>
+            <label for="max_transfer" class="form-label">Maximum Transfer Amount (৳)</label>
             <input type="number" step="0.01" name="max_transfer" id="max_transfer"
                    value="{{ old('max_transfer', $settings->max_transfer) }}"
                    class="form-control" required>

@@ -32,11 +32,11 @@
                             <td>{{ $key + 1 }}</td>
                             <td>{{ $inv->package->share_name }}</td>
                             <td>{{ $inv->quantity }}</td>
-                            <td>${{ number_format($inv->total_amount, 2) }}</td>
-                            <td>${{ number_format($inv->paid_amount, 2) }}</td>
+                            <td>৳{{ number_format($inv->total_amount, 2) }}</td>
+                            <td>৳{{ number_format($inv->paid_amount, 2) }}</td>
                             <td>
                                 <strong class="text-danger">
-                                    ${{ number_format($remaining, 2) }}
+                                    ৳{{ number_format($remaining, 2) }}
                                 </strong>
                             </td>
                             <td>
@@ -71,12 +71,12 @@
                                         </div>
 
                                         <div class="modal-body">
-                                            <p><strong>Total Amount:</strong> ${{ number_format($inv->total_amount, 2) }}</p>
-                                            <p><strong>Paid:</strong> ${{ number_format($inv->paid_amount, 2) }}</p>
+                                            <p><strong>Total Amount:</strong> ৳{{ number_format($inv->total_amount, 2) }}</p>
+                                            <p><strong>Paid:</strong> ৳{{ number_format($inv->paid_amount, 2) }}</p>
                                             <p><strong>Remaining:</strong>
-                                                <span class="text-danger">${{ number_format($remaining, 2) }}</span>
+                                                <span class="text-danger">৳{{ number_format($remaining, 2) }}</span>
                                             </p>
-                                            <p><strong>Your Wallet:</strong> ${{ number_format(auth()->user()->funding_wallet, 2) }}</p>
+                                            <p><strong>Your Wallet:</strong> ৳{{ number_format(auth()->user()->funding_wallet, 2) }}</p>
 
                                             <hr>
 

@@ -128,17 +128,14 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        // Get filter from request query param, default null (all)
         $statusFilter = $request->query('status');
 
-        // Start query for referrals
         $query = $user->referrals()
             ->with(['investors' => function ($query) {
                 $query->where('status', 'running');
             }])
             ->latest();
 
-        // Apply filter if provided
         if ($statusFilter === 'active') {
             $query->where('is_active', 1);
         } elseif ($statusFilter === 'inactive') {
@@ -148,12 +145,18 @@ class UserController extends Controller
         $referrals = $query->get();
 
         foreach ($referrals as $referral) {
-            $referral->running_investment_total = $referral->investors->sum('amount');
+            $referral->total_shares = $referral->investors->sum('quantity');
+
+            $referral->installment_shares = $referral->investors
+                ->where('purchase_type', 'installment')
+                ->sum('quantity');
+
+            $referral->total_invest_amount = $referral->investors->sum('total_amount');
+
+            $referral->total_paid_amount = $referral->investors->sum('paid_amount');
         }
 
         return view('user.pages.teamwork.index', compact('referrals', 'statusFilter'));
     }
-
-
 
 }

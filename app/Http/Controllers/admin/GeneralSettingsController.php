@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\GeneralSetting;
+use App\Models\Setting;
 use Illuminate\Http\Request;
+use App\Models\GeneralSetting;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
 class GeneralSettingsController extends Controller
@@ -50,5 +51,24 @@ class GeneralSettingsController extends Controller
         $generalSettings->update($data);
 
         return redirect()->route('admin.general.settings')->with('success', 'Settings updated successfully!');
+    }
+
+        // Show settings page
+    public function settings()
+    {
+        $settings = Setting::all()->pluck('value','key')->toArray();
+        return view('admin.pages.settings.settings', compact('settings'));
+    }
+
+    // Update settings
+    public function updateSettings(Request $request)
+    {
+        $input = $request->except('_token');
+
+        foreach ($input as $key => $value) {
+            Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+        }
+
+        return redirect()->back()->with('success', 'Settings updated successfully.');
     }
 }

@@ -17,7 +17,7 @@
                             <div class="package-title">{{ $package->share_name }}</div>
 
 <div class="price-tag">
-    ${{ number_format($package->amount, 2) }} <br>
+    ৳{{ number_format($package->amount, 2) }} <br>
     <span class="text-gray" style="font-size: 12px; font-weight: 500;">(Installment Available)</span>
 </div>
 
@@ -43,12 +43,12 @@
 
                                     <div class="stat-item">
                                         <span><i class="fas fa-hand-holding-usd"></i> First Installment</span>
-                                        <span>${{ number_format($package->first_installment, 2) }}</span>
+                                        <span>৳{{ number_format($package->first_installment, 2) }}</span>
                                     </div>
 
                                     <div class="stat-item">
                                         <span><i class="fas fa-calendar-alt"></i> Monthly EMI</span>
-                                        <span>${{ number_format($package->monthly_installment, 2) }}</span>
+                                        <span>৳{{ number_format($package->monthly_installment, 2) }}</span>
                                     </div>
 
                                     <div class="stat-item">
@@ -116,13 +116,13 @@
                     </div>
 
                     <div id="installmentDetails" class="d-none">
-                        <p><strong>First Installment:</strong> $<span id="firstInstallmentText"></span></p>
-                        <p><strong>Monthly EMI:</strong> $<span id="monthlyInstallmentText"></span></p>
+                        <p><strong>First Installment:</strong> ৳<span id="firstInstallmentText"></span></p>
+                        <p><strong>Monthly EMI:</strong> ৳<span id="monthlyInstallmentText"></span></p>
                         <p><strong>Total Months:</strong> <span id="totalMonthsText"></span></p>
                     </div>
 
                     <p class="mt-3">
-                        <strong>Total Payable:</strong> $<span id="modalTotalAmount">0.00</span>
+                        <strong>Total Payable:</strong> ৳<span id="modalTotalAmount">0.00</span>
                     </p>
 
                 </div>

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->decimal('amount', 15, 8);
             $table->decimal('charge', 15, 8)->default(0);
-            $table->enum('remark',['deposit','withdrawal','transfer', 'level_bonus','package_purchased', 'director_bonus', 'shareholder_bonus', 'club_bonus', 'rank_bonus','director_pool', 'shareholder_pool', 'club_pool', 'rank_pool' ]);
+            $table->enum('remark',['deposit','withdrawal','transfer', 'convert', 'level_bonus','package_purchased', 'director_bonus', 'shareholder_bonus', 'club_bonus', 'rank_bonus','director_pool', 'shareholder_pool', 'club_pool', 'rank_pool' ]);
             $table->enum('type',['-','+']);
             $table->enum('status',['Pending','Paid','Completed','Rejected']);
             $table->string('details')->nullable();

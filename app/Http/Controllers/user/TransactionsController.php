@@ -25,10 +25,13 @@ class TransactionsController extends Controller
     {
         $keyword = $request->get('keyword');
 
-        $query = Transactions::where('user_id', $request->user()->id);
+        $allowedTypes = ['transfer', 'convert', 'level_bonus', 'director_bonus', 'shareholder_bonus', 'club_bonus', 'rank_bonus'];
 
-        if ($keyword) {
-            $query->where('remark', '=', $keyword);
+        $query = Transactions::where('user_id', $request->user()->id)
+                            ->whereIn('remark', $allowedTypes);
+
+        if ($keyword && in_array($keyword, $allowedTypes)) {
+            $query->where('remark', $keyword);
         }
 
         $transactions = $query->orderBy('id', 'desc')->paginate(15);

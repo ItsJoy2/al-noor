@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('app_name');
             $table->string('logo')->nullable();
             $table->string('favicon')->nullable();
-            $table->decimal('referral_bonus', 20, 2)->default(0);
             $table->timestamps();
         });
 
@@ -25,7 +24,6 @@ return new class extends Migration
             'app_name' => 'Al-noor Paradise',
             'logo' => 'alnoorparadise',
             'favicon' => 'null',
-            'referral_bonus' => 10,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

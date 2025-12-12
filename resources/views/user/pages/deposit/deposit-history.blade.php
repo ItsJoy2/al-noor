@@ -88,7 +88,7 @@
                           </div>
                       @endif
                   </td>
-                  <td>${{ number_format($deposit->amount, 2) }}</td>
+                  <td>৳{{ number_format($deposit->amount, 2) }}</td>
                   <td>{{ $deposit->note ?? '-' }}</td>
                   <td><span class="badge badge-{{ $badge }}">{{ $statusText }}</span></td>
               </tr>

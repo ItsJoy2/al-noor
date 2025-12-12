@@ -14,17 +14,27 @@ class TransactionsController extends Controller
 
     public function index(Request $request)
     {
-        $query = Transactions::with('user')->orderBy('id', 'DESC');
+        $allowedRemarks = [
+            'transfer',
+            'convert',
+            'level_bonus',
+            'director_bonus',
+            'shareholder_bonus',
+            'club_bonus',
+            'rank_bonus'
+        ];
 
-        // Filter by email (if given)
+        $query = Transactions::with('user')
+            ->whereIn('remark', $allowedRemarks)
+            ->orderBy('id', 'DESC');
+
         if ($request->filled('email')) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('email', 'like', '%' . $request->email . '%');
             });
         }
 
-        // Filter by remark (if selected)
-        if ($request->filled('remark')) {
+        if ($request->filled('remark') && in_array($request->remark, $allowedRemarks)) {
             $query->where('remark', $request->remark);
         }
 

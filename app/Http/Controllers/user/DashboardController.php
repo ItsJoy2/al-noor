@@ -22,14 +22,17 @@ class DashboardController extends Controller
         $totalDeposit = Deposit::where('user_id', $user->id)->where('status', true)->sum('amount');
         $totalWithdraw = Transactions::where('user_id', $user->id)->where('remark', 'withdrawal')->sum('amount');
         $totalTransfer = Transactions::where('user_id', $user->id)->where('remark', 'transfer')->sum('amount');
-        $bonusBalance = Transactions::where('user_id', $user->id) ->where('type', '+')->whereIn('remark', ['rank_bonus', 'director_bonus', 'club_bonus', 'shareholder_bonus'])->sum('amount');
+        $bonusBalance = $user->bonus_wallet;
+
+        // $bonusBalance = Transactions::where('user_id', $user->id) ->where('type', '+')->whereIn('remark', ['rank_bonus', 'director_bonus', 'club_bonus', 'shareholder_bonus'])->sum('amount');
 
 
         $activeReferrals = User::where('refer_by', $user->id)->where('is_active', 1)->latest()->take(4)->get();
         $inactiveReferrals = User::where('refer_by', $user->id)->where('is_active', 0)->latest()->take(4)->get();
 
+        $allowedTypes = [ 'transfer', 'convert', 'level_bonus', 'director_bonus', 'shareholder_bonus', 'club_bonus', 'rank_bonus', ];
 
-        $transactions = Transactions::where('user_id', $user->id)->orderBy('created_at', 'desc')->take(6)->get();
+        $transactions = Transactions::where('user_id', $user->id)->whereIn('remark', $allowedTypes)->orderBy('created_at', 'desc')->take(6)->get();
 
 
         $now = Carbon::now();
@@ -71,7 +74,7 @@ class DashboardController extends Controller
 
             $lastWithdraw = Transactions::where('user_id', $user->id)->where('remark', 'withdrawal') ->orderBy('created_at', 'desc') ->first();
             $lastTransfer = Transactions::where('user_id', $user->id) ->where('remark', 'transfer')->orderBy('created_at', 'desc')->first();
-            $lastDeposit = Deposit::where('user_id', $user->id)->where('status', true)->orderBy('created_at', 'desc')->first();
+            $lastDeposit = Deposit::where('user_id', $user->id)->where('status', 'approved')->orderBy('created_at', 'desc')->first();
 
             $startDate = now()->subDays(30)->startOfDay();
 
@@ -103,8 +106,6 @@ class DashboardController extends Controller
                 $transferSeries[] = $transferMap[$date] ?? 0;
                 $withdrawSeries[] = $withdrawMap[$date] ?? 0;
             }
-
-
 
         $dashboard = [
             'totalDeposit' => $totalDeposit,

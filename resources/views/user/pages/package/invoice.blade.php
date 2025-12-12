@@ -57,7 +57,7 @@
 
                 <td>{{ $invoice->invoice_no }}</td>
 
-                <td>${{ number_format($invoice->amount, 2) }}</td>
+                <td>৳{{ number_format($invoice->amount, 2) }}</td>
 
                 <td>{{ ucfirst($invoice->type) }}</td>
 
@@ -104,12 +104,12 @@
                         <p><strong>Pending Installments:</strong> {{ $pendingInvoices->count() }}</p>
 
                         <p><strong>Total Pending Amount:</strong>
-                            ${{ number_format($totalPendingAmount, 2) }}
+                            ৳{{ number_format($totalPendingAmount, 2) }}
                         </p>
 
                         @if($reactivationCharge > 0)
                           <p><strong>Reactivation Charge:</strong>
-                              ${{ number_format($reactivationCharge, 2) }}
+                              ৳{{ number_format($reactivationCharge, 2) }}
                               <span class="badge badge-danger">Inactive Account</span>
                           </p>
                         @endif
@@ -118,12 +118,12 @@
 
                         <p><strong>Total Payable Amount:</strong>
                             <span class="text-primary">
-                                ${{ number_format($totalPayable, 2) }}
+                                ৳{{ number_format($totalPayable, 2) }}
                             </span>
                         </p>
 
                         <p><strong>Your Wallet Balance:</strong>
-                            ${{ number_format(auth()->user()->funding_wallet, 2) }}
+                            ৳{{ number_format(auth()->user()->funding_wallet, 2) }}
                         </p>
 
                         @if(auth()->user()->funding_wallet < $totalPayable)
@@ -139,7 +139,7 @@
                             @foreach($pendingInvoices as $p)
                                 <li>
                                     <strong>{{ $p->invoice_no }}</strong> —
-                                    ${{ number_format($p->amount,2) }}
+                                    ৳{{ number_format($p->amount,2) }}
                                     ({{ $p->created_at->format('d M Y') }})
                                 </li>
                             @endforeach

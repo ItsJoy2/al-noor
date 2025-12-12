@@ -3,38 +3,32 @@
 namespace App\Http\Controllers\admin;
 
 use App\Models\User;
-use App\Models\Transactions;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class UsersController extends Controller
 {
+    /**
+     * Display user list with filters & search
+     */
     public function index(Request $request)
     {
-        $filter = $request->filter;
-        $search = $request->search;
+        $query = User::query()
+            ->where('role', 'user')
+            ->with(['referredBy'])
+            ->withSum('investors', 'paid_amount');
 
-         $query = User::query()->where('role', 'user')->with('referredBy')->withSum('investors', 'amount');
-
-        if ($filter) {
-            switch ($filter) {
-                case 'blocked':
-                    $query->where('is_block', 1);
-                    break;
-                case 'unblocked':
-                    $query->where('is_block', 0);
-                    break;
-                case 'active':
-                    $query->where('is_active', 1);
-                    break;
-                case 'inactive':
-                    $query->where('is_active', 0);
-                    break;
-            }
+        // --- Filter ---
+        if ($request->filled('filter')) {
+            $query->when($request->filter == 'blocked', fn($q) => $q->where('is_block', 1))
+                ->when($request->filter == 'unblocked', fn($q) => $q->where('is_block', 0))
+                ->when($request->filter == 'active', fn($q) => $q->where('is_active', 1))
+                ->when($request->filter == 'inactive', fn($q) => $q->where('is_active', 0));
         }
 
-        if (!empty($search)) {
-            $query->where('email', 'like', '%' . $search . '%');
+        // --- Search by email ---
+        if ($request->filled('search')) {
+            $query->where('email', 'like', "%" . $request->search . "%");
         }
 
         $users = $query->orderByDesc('id')->paginate(10);
@@ -42,13 +36,18 @@ class UsersController extends Controller
         return view('admin.pages.users.index', compact('users'));
     }
 
-
+    /**
+     * Show single user
+     */
     public function show($id)
     {
         $user = User::with(['referredBy', 'investors'])->findOrFail($id);
-
         return view('admin.pages.users.show', compact('user'));
     }
+
+    /**
+     * Update user basic info
+     */
     public function update(Request $request)
     {
         $user = User::findOrFail($request->user_id);
@@ -60,45 +59,39 @@ class UsersController extends Controller
             'is_block' => 'required|boolean',
         ]);
 
-        $user->name     = $request->name;
-        $user->email    = $request->email;
-        $user->mobile   = $request->mobile;
-        $user->is_block = $request->is_block;
+        $user->update($validated);
 
-        $user->save();
-
-        return redirect()->back()->with('success', 'User updated successfully!');
+        return back()->with('success', 'User updated successfully!');
     }
 
+    /**
+     * Admin wallet update
+     */
     public function updateWallet(Request $request)
     {
         $request->validate([
             'user_id'     => 'required|exists:users,id',
-            'wallet_type' => 'required|in:funding_wallet,spot_wallet,token_wallet',
+            'wallet_type' => 'required|in:funding_wallet,bonus_wallet',
             'action_type' => 'required|in:add,subtract',
-            'amount'      => 'required|numeric|min:0.01',
+            'amount'      => 'required|numeric|min:0.00000001',
         ]);
 
-        $user = User::findOrFail($request->user_id);
+        $user   = User::findOrFail($request->user_id);
         $wallet = $request->wallet_type;
-        $amount = $request->amount;
-
-        if (!in_array($wallet, ['funding_wallet', 'spot_wallet', 'token_wallet'])) {
-            return redirect()->back()->with('error', 'Invalid wallet type selected.');
-        }
+        $amount = (float)$request->amount;
 
         if ($request->action_type === 'add') {
-            $user->$wallet += $amount;
-        } elseif ($request->action_type === 'subtract') {
-            if ($user->$wallet < $amount) {
-                return redirect()->back()->with('error', 'Insufficient balance in selected wallet.');
+            $user->$wallet = bcadd($user->$wallet, $amount, 8);
+        } else { 
+            if (bccomp($user->$wallet, $amount, 8) < 0) {
+                return back()->with('error', 'Insufficient balance in the selected wallet.');
             }
-            $user->$wallet -= $amount;
+            $user->$wallet = bcsub($user->$wallet, $amount, 8);
         }
 
         $user->save();
 
-        return redirect()->back()->with('success', 'Wallet updated successfully.');
+        return back()->with('success', ucfirst(str_replace('_', ' ', $wallet)) . ' updated successfully.');
     }
 
 }

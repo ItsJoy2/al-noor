@@ -51,7 +51,7 @@
             <label>Deposit Amount</label>
             <div class="input-group">
               <div class="input-group-prepend">
-                <span class="input-group-text bg-primary text-white">$</span>
+                <span class="input-group-text bg-primary text-white">৳</span>
               </div>
               <input type="number" class="form-control bg-transparent text-light border" name="amount" step="0.01" required>
             </div>

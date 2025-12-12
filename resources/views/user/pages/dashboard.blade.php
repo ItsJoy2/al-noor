@@ -53,7 +53,7 @@
                     <div class="row">
                       <div class="col-9">
                         <div class="d-flex align-items-center align-self-start">
-                          <h3 class="mb-0">${{ number_format($user->funding_wallet, 2) }}</h3>
+                          <h3 class="mb-0">৳{{ number_format($user->funding_wallet, 2) }}</h3>
                           {{-- <p class="text-success ml-2 mb-0 font-weight-medium">+3.5%</p> --}}
                         </div>
                       </div>
@@ -97,7 +97,7 @@
                     <div class="row">
                       <div class="col-9">
                         <div class="d-flex align-items-center align-self-start">
-                          <h3 class="mb-0">${{ number_format($dashboard['bonusBalance'], 2) }}</h3>
+                          <h3 class="mb-0">৳{{ number_format($dashboard['bonusBalance'], 2) }}</h3>
                           {{-- <p class="text-success ml-2 mb-0 font-weight-medium">+11%</p> --}}
                         </div>
                       </div>
@@ -177,7 +177,7 @@
                     <div class="row">
                       <div class="col-9">
                         <div class="d-flex align-items-center align-self-start">
-                          <h3 class="mb-0">${{ number_format($dashboard['totalWithdraw'], 2) }}</h3>
+                          <h3 class="mb-0">৳{{ number_format($dashboard['totalWithdraw'], 2) }}</h3>
                           {{-- <p class="text-success ml-2 mb-0 font-weight-medium">+3.5%</p> --}}
                         </div>
                       </div>
@@ -197,7 +197,7 @@
                     <div class="row">
                       <div class="col-9">
                         <div class="d-flex align-items-center align-self-start">
-                          <h3 class="mb-0">${{ number_format($dashboard['totalTransfer'], 2) }}</h3>
+                          <h3 class="mb-0">৳{{ number_format($dashboard['totalTransfer'], 2) }}</h3>
                           {{-- <p class="text-success ml-2 mb-0 font-weight-medium">+3.5%</p> --}}
                         </div>
                       </div>
@@ -322,7 +322,7 @@
 
 
 
-                        <div class="row">
+            <div class="row">
             <div class="col-md-4 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
@@ -341,7 +341,7 @@
                     </div>
                     <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
                     <h6 class="font-weight-bold mb-0">
-                        ${{ $dashboard['lastTransfer'] ? number_format($dashboard['lastTransfer']->amount, 2) : '0.00' }}
+                        ৳{{ $dashboard['lastTransfer'] ? number_format($dashboard['lastTransfer']->amount, 2) : '0.00' }}
                     </h6>
                     </div>
                 </div>
@@ -358,7 +358,7 @@
                     </div>
                     <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
                     <h6 class="font-weight-bold mb-0">
-                        ${{ $dashboard['lastWithdraw'] ? number_format($dashboard['lastWithdraw']->amount, 2) : '0.00' }}
+                        ৳{{ $dashboard['lastWithdraw'] ? number_format($dashboard['lastWithdraw']->amount, 2) : '0.00' }}
                     </h6>
                     </div>
                 </div>
@@ -375,7 +375,7 @@
                     </div>
                     <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
                     <h6 class="font-weight-bold mb-0">
-                        ${{ $dashboard['lastDeposit'] ? number_format($dashboard['lastDeposit']->amount, 2) : '0.00' }}
+                        ৳{{ $dashboard['lastDeposit'] ? number_format($dashboard['lastDeposit']->amount, 2) : '0.00' }}
                     </h6>
                     </div>
                 </div>
@@ -566,6 +566,6 @@
         };
 
         window.transactionTotalAmount = {{ $dashboard['totalDeposit'] + $dashboard['totalWithdraw'] + $dashboard['totalTransfer'] }};
-    </>
+    </script>
 
 @endpush

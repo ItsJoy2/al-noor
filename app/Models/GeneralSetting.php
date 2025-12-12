@@ -14,6 +14,5 @@ protected $table = 'general_settings';
         'app_name',
         'logo',
         'favicon',
-        'referral_bonus',
     ];
 }
