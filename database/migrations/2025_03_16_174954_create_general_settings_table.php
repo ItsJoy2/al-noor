@@ -22,8 +22,8 @@ return new class extends Migration
         });
 
         DB::table('general_settings')->insert([
-            'app_name' => 'Edulife',
-            'logo' => 'Edulife',
+            'app_name' => 'Al-noor Paradise',
+            'logo' => 'alnoorparadise',
             'favicon' => 'null',
             'referral_bonus' => 10,
             'created_at' => now(),
