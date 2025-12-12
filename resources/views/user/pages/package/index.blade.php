@@ -103,7 +103,7 @@
 
                     <div class="mb-3">
                         <label>Quantity</label>
-                        <input type="number" min="1" class="form-control bg-transparent text-light" name="quantity" id="modalQuantityInput">
+                        <input type="number" min="1" class="form-control bg-transparent text-light" name="quantity" id="modalQuantityInput" required>
                         <small id="modalQuantityLimit" class="text-muted"></small>
                     </div>
 

@@ -26,16 +26,24 @@ class User extends Authenticatable
         'is_active',
         'last_activated_at',
         'is_block',
+        'rank',
+        'club',
+        'is_shareholder',
+        'is_director',
+        'kyc_status',
         'password',
         'birthday',
         'nid_or_passport',
         'address',
         'image',
+        'role',
     ];
+
     protected $hidden = [
         'password',
         'remember_token'
     ];
+
     protected $casts = [
         'last_activated_at' => 'datetime',
         'email_verified_at' => 'datetime',
@@ -43,6 +51,8 @@ class User extends Authenticatable
         'is_active' => 'boolean',
         'is_block' => 'boolean',
         'kyc_status' => 'boolean',
+        'is_shareholder' => 'boolean',
+        'is_director' => 'boolean',
     ];
     public function referredBy(): BelongsTo
     {

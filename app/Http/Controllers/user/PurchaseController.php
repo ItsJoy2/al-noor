@@ -45,70 +45,101 @@ public function index()
 
 
     // Purchase function
-public function purchase(Request $request)
-{
-    $request->validate([
-        'package_id' => 'required|exists:packages,id',
-        'purchase_type' => 'required|in:full,installment',
-        'quantity' => 'required|integer|min:1'
-    ]);
-
-    $user = auth()->user();
-    $package = Package::findOrFail($request->package_id);
-    $quantity = $request->quantity;
-
-    $totalPurchased = Investor::where('user_id', $user->id)->where('package_id', $package->id)->sum('quantity');
-
-    $newTotal = $totalPurchased + $quantity;
-
-    if ($newTotal > $package->per_purchase_limit) {
-        return back()->with('error', 'You have reached the maximum purchase limit of '.$package->per_purchase_limit.' shares for this package.');
-    }
-
-    if ($quantity > $package->per_purchase_limit) {
-        return back()->with('error', 'You cannot buy more than '.$package->per_purchase_limit.' shares at once.');
-    }
-
-    $totalAmount = $package->amount * $quantity;
-    $firstInstallAmount = $package->first_installment * $quantity;
-
-    // 🔥 FIXED — CHECK FUNDING WALLET (NOT balance)
-    if ($request->purchase_type === 'full') {
-        if ($user->funding_wallet < $totalAmount) {
-            return back()->with('error', 'Insufficient balance for full payment.');
-        }
-    }
-
-    if ($request->purchase_type === 'installment') {
-        if ($user->funding_wallet < $firstInstallAmount) {
-            return back()->with('error', 'Insufficient balance for first installment.');
-        }
-    }
-
-    // Auto activate user
-    if (!$user->is_active) {
-        $user->is_active = true;
-        $user->save();
-    }
-
-    return DB::transaction(function () use ($user, $package, $quantity, $request, $totalAmount, $firstInstallAmount) {
-
-        $investor = Investor::create([
-            'user_id' => $user->id,
-            'package_id' => $package->id,
-            'quantity' => $quantity,
-            'purchase_type' => $request->purchase_type,
-            'total_amount' => $totalAmount,
-            'status' => $request->purchase_type === 'full' ? 'paid' : 'active',
+    public function purchase(Request $request)
+    {
+        $request->validate([
+            'package_id' => 'required|exists:packages,id',
+            'purchase_type' => 'required|in:full,installment',
+            'quantity' => 'required|integer|min:1'
         ]);
 
-        if ($request->purchase_type === 'full') {
-            return $this->fullPayment($user, $investor, $totalAmount);
+        $user = auth()->user();
+        $package = Package::findOrFail($request->package_id);
+        $quantity = $request->quantity;
+
+        $totalPurchased = Investor::where('user_id', $user->id)
+                                ->where('package_id', $package->id)
+                                ->sum('quantity');
+
+        $newTotal = $totalPurchased + $quantity;
+
+        if ($newTotal > $package->per_purchase_limit) {
+            return back()->with('error', 'You have reached the maximum purchase limit of '.$package->per_purchase_limit.' shares for this package.');
         }
 
-        return $this->firstInstallmentPayment($user, $package, $investor, $quantity);
-    });
-}
+        if ($quantity > $package->per_purchase_limit) {
+            return back()->with('error', 'You cannot buy more than '.$package->per_purchase_limit.' shares at once.');
+        }
+
+        $totalAmount = $package->amount * $quantity;
+        $firstInstallAmount = $package->first_installment * $quantity;
+
+        if ($request->purchase_type === 'full' && $user->funding_wallet < $totalAmount) {
+            return back()->with('error', 'Insufficient balance for full payment.');
+        }
+
+        if ($request->purchase_type === 'installment' && $user->funding_wallet < $firstInstallAmount) {
+            return back()->with('error', 'Insufficient balance for first installment.');
+        }
+
+        if (!$user->is_active) {
+            $user->is_active = true;
+            $user->save();
+        }
+
+        return DB::transaction(function () use ($user, $package, $quantity, $request, $totalAmount, $firstInstallAmount) {
+
+            $investor = Investor::create([
+                'user_id' => $user->id,
+                'package_id' => $package->id,
+                'quantity' => $quantity,
+                'purchase_type' => $request->purchase_type,
+                'total_amount' => $totalAmount,
+                'status' => $request->purchase_type === 'full' ? 'paid' : 'active',
+            ]);
+
+            if ($request->purchase_type === 'full') {
+                $this->fullPayment($user, $investor, $totalAmount);
+            } else {
+                $this->firstInstallmentPayment($user, $package, $investor, $quantity);
+            }
+
+            // SHAREHOLDER, CLUB, RANK
+            $settings = DB::table('settings')->pluck('value','key')->toArray();
+            $totalShares = Investor::where('user_id', $user->id)->sum('quantity');
+            $activeReferrals = User::where('refer_by', $user->id)->where('is_active', true)->count();
+
+            // Shareholder
+            $user->is_shareholder = $totalShares >= ($settings['shareholder_min_shares'] ?? 5);
+
+            // Club
+            if ($totalShares >= ($settings['club3_min_shares'] ?? 50)) {
+                $user->club = 'club3';
+            } elseif ($totalShares >= ($settings['club2_min_shares'] ?? 25)) {
+                $user->club = 'club2';
+            } elseif ($totalShares >= ($settings['club1_min_shares'] ?? 10)) {
+                $user->club = 'club1';
+            } else {
+                $user->club = 'none';
+            }
+
+            // Rank
+            if ($totalShares >= ($settings['rank3_min_shares'] ?? 50) && $activeReferrals >= ($settings['rank3_min_active_referrals'] ?? 15)) {
+                $user->rank = 'rank3';
+            } elseif ($totalShares >= ($settings['rank2_min_shares'] ?? 25) && $activeReferrals >= ($settings['rank2_min_active_referrals'] ?? 10)) {
+                $user->rank = 'rank2';
+            } elseif ($totalShares >= ($settings['rank1_min_shares'] ?? 10) && $activeReferrals >= ($settings['rank1_min_active_referrals'] ?? 5)) {
+                $user->rank = 'rank1';
+            } else {
+                $user->rank = 'none';
+            }
+
+            $user->save();
+
+            return back()->with('success', 'Share Purchase successful!');
+        });
+    }
+
 
     /**
      * Full Payment

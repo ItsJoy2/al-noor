@@ -14,11 +14,11 @@
                             </div>
                             <div class="col-5 col-sm-7 col-xl-8 p-0">
                                 <h4 class="mb-1 mb-sm-0">Want to active your account?</h4>
-                                <p class="mb-0 font-weight-normal d-none d-sm-block">Start your investment journey with us!</p>
+                                <p class="mb-0 font-weight-normal d-none d-sm-block">Purchase a share and start with us!</p>
                             </div>
                             <div class="col-3 col-sm-2 col-xl-2 pl-0 text-center">
                                 <span>
-                                    <a href="{{ route('user.activation') }}" class="btn btn-outline-light btn-rounded get-started-btn">Active Now</a>
+                                    <a href="{{ route('user.purchase') }}" class="btn btn-outline-light btn-rounded get-started-btn">Purchase Now</a>
                                 </span>
                             </div>
                         </div>
