@@ -50,8 +50,8 @@
             <div class="collapse" id="wallets">
               <ul class="nav flex-column sub-menu">
                 <li class="nav-item" > <a class="nav-link " href="{{ route('user.deposit.index') }}">Add Fund</a></li>
-                {{-- <li class="nav-item"> <a class="nav-link" href="{{ route('user.withdraw.index') }}">Make Withdraw</a></li>
-                <li class="nav-item"> <a class="nav-link" href="{{ route('user.transfer.form') }}">Fund Transfer</a></li> --}}
+                {{-- <li class="nav-item"> <a class="nav-link" href="{{ route('user.withdraw.index') }}">Make Withdraw</a></li> --}}
+                <li class="nav-item"> <a class="nav-link" href="{{ route('user.transfer.form') }}">Fund Transfer</a></li>
               </ul>
             </div>
           </li>

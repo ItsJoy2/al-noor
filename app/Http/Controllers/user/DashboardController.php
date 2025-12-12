@@ -19,7 +19,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        $totalDeposit = Deposit::where('user_id', $user->id)->where('status', true)->sum('amount');
+        $totalDeposit = Deposit::where('user_id', $user->id)->where('status', 'approved')->sum('amount');
         $totalWithdraw = Transactions::where('user_id', $user->id)->where('remark', 'withdrawal')->sum('amount');
         $totalTransfer = Transactions::where('user_id', $user->id)->where('remark', 'transfer')->sum('amount');
         $bonusBalance = $user->bonus_wallet;

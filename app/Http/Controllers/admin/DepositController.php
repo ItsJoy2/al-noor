@@ -32,7 +32,8 @@ class DepositController extends Controller
             $status = $request->input('status');
             $query->where('status', $status);
         }
-
+        $query->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+            ->orderBy('created_at', 'desc');
         $deposits = $query->paginate(10);
 
         return view('admin.pages.deposit.index', compact('deposits'));
@@ -94,6 +95,12 @@ class DepositController extends Controller
             $deposit->status = $request->status;
             $deposit->note = $request->note ?? $deposit->note;
             $deposit->save();
+
+            if ($deposit->status === 'approved') {
+                $user = $deposit->user;
+                $user->funding_wallet += $deposit->amount;
+                $user->save();
+            }
 
             DB::commit();
 

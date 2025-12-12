@@ -29,7 +29,7 @@
                     <div class="form-group">
                         <label for="selectWallet">Your Balance</label>
                         <select class="form-control text-primary" id="selectWallet" disabled>
-                            <option>Funding Wallet: ${{ number_format(auth()->user()->funding_wallet, 2) }}</option>
+                            <option>Funding Wallet: ৳{{ number_format(auth()->user()->funding_wallet, 2) }}</option>
                         </select>
                     </div>
 
@@ -50,7 +50,7 @@
                         <label for="inputAmount">Transfer Amount</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text bg-primary text-white">$</span>
+                                <span class="input-group-text bg-primary text-white">৳</span>
                             </div>
                             <input type="number"
                                    name="amount"
@@ -64,7 +64,7 @@
                                    max="{{ $transferSettings->max_transfer }}">
                         </div>
                         <small class="form-text text-muted mt-1">
-                            Min: ${{ $transferSettings->min_transfer }}, Max: ${{ $transferSettings->max_transfer }}
+                            Min: ৳{{ $transferSettings->min_transfer }}, Max: ৳{{ $transferSettings->max_transfer }}
                         </small>
                     </div>
 
