@@ -104,6 +104,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Deposit::class);
     }
+    
+    public function nominees(): HasMany
+    {
+        return $this->hasMany(Nominee::class);
+    }
 
 }
 

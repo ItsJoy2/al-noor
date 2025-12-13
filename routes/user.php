@@ -55,6 +55,7 @@ Route::prefix('user')->middleware('auth')->group(function () {
     //profile
     Route::get('profile', [AuthController::class, 'profileEdit'])->name('user.profile');
     Route::post('profile', [AuthController::class, 'updateProfile'])->name('user.profile.update');
+    Route::post('nominee', [AuthController::class, 'nominee'])->name('user.nominee.update');
     Route::post('change-password', [AuthController::class, 'changePassword'])->name('user.changePassword');
     Route::get('my-referrals', [UserController::class, 'directReferrals'])->name('user.direct.referrals');
 

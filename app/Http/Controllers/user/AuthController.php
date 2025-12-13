@@ -47,7 +47,8 @@ public function registerForm() :View
     public function profileEdit(): View
     {
         $user = auth()->user();
-        return view('user.pages.profile.index', compact('user'));
+        $nominee = $user->nominees()->first();
+        return view('user.pages.profile.index', compact('user', 'nominee'));
     }
         public function updateProfile(Request $request): RedirectResponse
     {
@@ -148,6 +149,31 @@ public function registerForm() :View
             'status' => true,
             'message' => 'Password reset successfully'
         ]);
+    }
+
+        public function nominee(Request $request)
+    {
+        $request->validate([
+            'nominee_name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date',
+            'sex' => 'required|in:male,female,other',
+            'relationship' => 'required|string|max:100',
+            'birth_registration_or_nid' => 'required|string',
+        ]);
+
+        $user = auth()->user();
+
+        $user->nominees()->updateOrCreate(
+            ['birth_registration_or_nid' => $request->birth_registration_or_nid],
+            $request->only([
+                'nominee_name',
+                'date_of_birth',
+                'sex',
+                'relationship'
+            ])
+        );
+
+        return back()->with('success', 'Nominee saved successfully.');
     }
 
 }

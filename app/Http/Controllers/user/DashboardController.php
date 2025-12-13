@@ -32,7 +32,50 @@ class DashboardController extends Controller
 
         $allowedTypes = [ 'transfer', 'convert', 'level_bonus', 'director_bonus', 'shareholder_bonus', 'club_bonus', 'rank_bonus', ];
 
-        $transactions = Transactions::where('user_id', $user->id)->whereIn('remark', $allowedTypes)->orderBy('created_at', 'desc')->take(6)->get();
+            $allowedTransactionRemarks = [
+                'withdrawal',
+                'transfer',
+                'convert',
+                'level_bonus',
+                'director_bonus',
+                'shareholder_bonus',
+                'club_bonus',
+                'rank_bonus',
+            ];
+
+            // Transactions table data
+            $transactions = Transactions::where('user_id', $user->id)
+                ->whereIn('remark', $allowedTransactionRemarks)
+                ->select('id', 'remark', 'amount', 'details', 'created_at')
+                ->get()
+                ->map(function ($item) {
+                    $item->source = 'transaction';
+                    return $item;
+                });
+
+            // Deposit table data
+                $deposits = Deposit::with('method')
+                    ->where('user_id', $user->id)
+                    ->where('status', 'approved')
+                    ->select('id', 'method_id', 'amount', 'note', 'created_at')
+                    ->get()
+                    ->map(function ($item) {
+
+                        $methodName = $item->method->name ?? 'Unknown Method';
+
+                        $item->remark  = 'deposit';
+                        $item->details = 'Deposit Via ' . $methodName;
+                        $item->source  = 'deposit';
+
+                        return $item;
+                    });
+
+            // Merge + sort + limit
+            $allTransactions = $transactions
+                ->merge($deposits)
+                ->sortByDesc('created_at')
+                ->take(6)
+                ->values();
 
 
         $now = Carbon::now();
@@ -160,7 +203,7 @@ class DashboardController extends Controller
             'chartDeposits' => $depositSeries,
             'chartTransfers' => $transferSeries,
             'chartWithdraws' => $withdrawSeries,
-            'transactions' => $transactions,
+            'transactions' => $allTransactions,
             'activeReferrals' => $activeReferrals,
             'inactiveReferrals' => $inactiveReferrals,
             // 'totalExpectedReturn' => $totalExpectedReturn,

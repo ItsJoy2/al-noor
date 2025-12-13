@@ -107,8 +107,75 @@
         </div>
     </div>
 
-    {{-- Change Password --}}
+
     <div class="col-md-4">
+
+            {{-- Nominee --}}
+                <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <h5 class="mb-3">Nominee Information</h5>
+
+                <form action="{{ route('user.nominee.update') }}" method="POST">
+                    @csrf
+
+                    {{-- Nominee Name --}}
+                    <div class="form-group">
+                        <label>Nominee Name</label>
+                        <input type="text"
+                               name="nominee_name"
+                               value="{{ old('nominee_name', $nominee->nominee_name ?? '') }}"
+                               class="form-control text-white">
+                    </div>
+
+                    {{-- DOB --}}
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date"
+                               name="date_of_birth"
+                               value="{{ old('date_of_birth', isset($nominee) ? $nominee->date_of_birth->format('Y-m-d') : '') }}"
+                               class="form-control text-white">
+                    </div>
+
+                    {{-- Sex --}}
+                    <div class="form-group">
+                        <label>Sex</label>
+                        <select name="sex" class="form-control text-white">
+                            <option value="">Select</option>
+                            @foreach(['male'=>'Male','female'=>'Female','other'=>'Other'] as $k=>$v)
+                                <option value="{{ $k }}"
+                                    {{ old('sex', $nominee->sex ?? '') == $k ? 'selected' : '' }}>
+                                    {{ $v }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Relationship --}}
+                    <div class="form-group">
+                        <label>Relationship</label>
+                        <input type="text"
+                               name="relationship"
+                               value="{{ old('relationship', $nominee->relationship ?? '') }}"
+                               class="form-control text-white">
+                    </div>
+
+                    {{-- NID --}}
+                    <div class="form-group">
+                        <label>Birth Reg / NID</label>
+                        <input type="text"
+                               name="birth_registration_or_nid"
+                               value="{{ old('birth_registration_or_nid', $nominee->birth_registration_or_nid ?? '') }}"
+                               class="form-control text-white">
+                    </div>
+
+                    <button class="btn btn-primary mt-2 w-100">
+                        Update Nominee
+                    </button>
+                </form>
+            </div>
+        </div>
+
+            {{-- Change Password --}}
         <div class="card shadow-sm border-0">
             <div class="card-body">
                 <h5 class="mb-3">Change Password</h5>
