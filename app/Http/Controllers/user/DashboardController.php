@@ -107,6 +107,38 @@ class DashboardController extends Controller
                 $withdrawSeries[] = $withdrawMap[$date] ?? 0;
             }
 
+            $rankLabels = [
+                'none'  => 'No Rank',
+                'rank1' => 'Land Pioneer',
+                'rank2' => 'Land Baron',
+                'rank3' => 'Land Magnate',
+            ];
+
+            // $rankColors = [
+            //     'none'  => 'danger',
+            //     'rank1' => 'secondary',
+            //     'rank2' => 'info',
+            //     'rank3' => 'success',
+            // ];
+
+            $currentRank = $user->rank ?? 'none';
+
+            $clubLabels = [
+                'none'  => 'No Club',
+                'club1' => 'Greenfield Club',
+                'club2' => 'Prime Land Club',
+                'club3' => 'Elite Land Owners Club',
+            ];
+
+            // $rankColors = [
+            //     'none'  => 'danger',
+            //     'rank1' => 'secondary',
+            //     'rank2' => 'info',
+            //     'rank3' => 'success',
+            // ];
+
+            $currentClub = $user->club ?? 'none';
+
         $dashboard = [
             'totalDeposit' => $totalDeposit,
             'totalWithdraw'   => $totalWithdraw,
@@ -134,6 +166,9 @@ class DashboardController extends Controller
             // 'totalExpectedReturn' => $totalExpectedReturn,
             'totalSharesBought' => $totalSharesBought,
             'totalInstallmentShares' => $totalInstallmentShares,
+            'rank_label'  => $rankLabels[$currentRank] ?? 'No Rank',
+            // 'rank_color'  => $rankColors[$currentRank] ?? 'danger',
+            'club_label'  => $clubLabels[$currentClub] ?? 'No Club',
 
          ];
 

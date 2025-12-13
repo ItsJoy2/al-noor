@@ -3,7 +3,7 @@
 
 						<a href="{{ route('user.dashboard') }}" class="logo">
 							@if($generalSettings && $generalSettings->logo)
-                                <img src="{{ asset('public/storage/' . $generalSettings->logo) }}" alt="{{ $generalSettings->app_name ?? 'App Name' }}" class="navbar-brand" height="50">
+                                <img src="{{ asset('storage/' . $generalSettings->logo) }}" alt="{{ $generalSettings->app_name ?? 'App Name' }}" class="navbar-brand" height="50">
                             @endif
 						</a>
 						<div class="nav-toggle">

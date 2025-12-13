@@ -218,7 +218,7 @@
                     <div class="row">
                       <div class="col-9">
                         <div class="d-flex align-items-center align-self-start">
-                          <h3 class="mb-0">No Rank</h3>
+                          <h3 class="mb-0">{{ $dashboard['rank_label'] }}</h3>
                           {{-- <p class="text-success ml-2 mb-0 font-weight-medium">+3.5%</p> --}}
                         </div>
                       </div>
@@ -229,6 +229,26 @@
                       </div>
                     </div>
                     <h6 class="text-muted font-weight-normal">Current Rank</h6>
+                  </div>
+                </div>
+              </div>
+                            <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-9">
+                        <div class="d-flex align-items-center align-self-start">
+                          <h3 class="mb-0">{{ $dashboard['club_label'] }}</h3>
+                          {{-- <p class="text-success ml-2 mb-0 font-weight-medium">+3.5%</p> --}}
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="icon icon-box-success ">
+                          <span class="mdi mdi-crown icon-item text-success"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <h6 class="text-muted font-weight-normal">Current Club</h6>
                   </div>
                 </div>
               </div>
@@ -440,7 +460,7 @@
                                     <p class="text-muted mb-0">{{ $transaction->created_at->format('d M Y') }}</p>
                                 </div>
                                 <div class="mr-auto text-sm-right pt-2 pt-sm-0">
-                                    <p class="text-muted">Amount: ${{ number_format($transaction->amount, 2) }}</p>
+                                    <p class="text-muted">Amount:৳{{ number_format($transaction->amount, 2) }}</p>
                                     @php
                                         $details = $transaction->details ?? '-';
                                         if ($transaction->remark === 'withdrawal' && strlen($details) > 20) {

@@ -124,39 +124,38 @@ class UserController extends Controller
     }
 
 
-    public function directReferrals(Request $request)
-    {
-        $user = Auth::user();
+public function directReferrals(Request $request)
+{
+    $user = Auth::user();
+    $statusFilter = $request->query('status');
 
-        $statusFilter = $request->query('status');
+    $query = $user->referrals()
+        ->with('investors')
+        ->latest();
 
-        $query = $user->referrals()
-            ->with(['investors' => function ($query) {
-                $query->where('status', 'running');
-            }])
-            ->latest();
-
-        if ($statusFilter === 'active') {
-            $query->where('is_active', 1);
-        } elseif ($statusFilter === 'inactive') {
-            $query->where('is_active', 0);
-        }
-
-        $referrals = $query->get();
-
-        foreach ($referrals as $referral) {
-            $referral->total_shares = $referral->investors->sum('quantity');
-
-            $referral->installment_shares = $referral->investors
-                ->where('purchase_type', 'installment')
-                ->sum('quantity');
-
-            $referral->total_invest_amount = $referral->investors->sum('total_amount');
-
-            $referral->total_paid_amount = $referral->investors->sum('paid_amount');
-        }
-
-        return view('user.pages.teamwork.index', compact('referrals', 'statusFilter'));
+    if ($statusFilter === 'active') {
+        $query->where('is_active', 1);
+    } elseif ($statusFilter === 'inactive') {
+        $query->where('is_active', 0);
     }
+
+    $referrals = $query->get();
+
+    foreach ($referrals as $referral) {
+
+        $referral->total_shares = $referral->investors->sum('quantity');
+
+        $referral->installment_shares = $referral->investors
+            ->where('purchase_type', 'installment')
+            ->sum('quantity');
+
+        $referral->total_invest_amount = $referral->investors->sum('total_amount');
+
+        $referral->total_paid_amount = $referral->investors->sum('paid_amount');
+    }
+
+    return view('user.pages.teamwork.index', compact('referrals', 'statusFilter'));
+}
+
 
 }

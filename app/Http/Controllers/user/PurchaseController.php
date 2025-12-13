@@ -416,7 +416,16 @@ public function index()
     public function payAnyAmount(Request $request, $investorId)
     {
         $request->validate([
-            'amount' => 'required|numeric|min:1',
+            'amount' => [
+                'required',
+                'numeric',
+                'min:1000',
+                function ($attribute, $value, $fail) {
+                    if ($value % 1000 !== 0) {
+                        $fail('Amount must be in multiples of 1000 (e.g. 1000, 2000, 3000).');
+                    }
+                },
+            ],
         ]);
 
         $user = auth()->user();

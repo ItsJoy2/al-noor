@@ -13,7 +13,7 @@
             <ul class="navbar-nav w-100">
                 <a class="navbar-brand d-lg-none" href="{{ route('user.dashboard') }}">
                 @if($generalSettings && $generalSettings->logo)
-                    <img src="{{ asset('public/storage/' . $generalSettings->logo) }}" alt="{{ $generalSettings->app_name ?? 'App Name' }}" class="navbar-brand" height="50">
+                    <img src="{{ asset('storage/' . $generalSettings->logo) }}" alt="{{ $generalSettings->app_name ?? 'App Name' }}" class="navbar-brand" height="50">
                 @endif
             </a>
               {{-- <li class="nav-item w-100">

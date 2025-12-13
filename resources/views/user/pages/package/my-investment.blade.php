@@ -5,7 +5,9 @@
 <div class="page-header">
     <h3 class="page-title">My Share Investments</h3>
 </div>
+
 @include('user.layouts.alert')
+
 <div class="card">
     <div class="card-body">
 
@@ -23,81 +25,109 @@
                         <th>Action</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    @foreach($investors as $key => $inv)
-                        @php
-                            $remaining = $inv->total_amount - $inv->paid_amount;
-                        @endphp
-                        <tr>
-                            <td>{{ $key + 1 }}</td>
-                            <td>{{ $inv->package->share_name }}</td>
-                            <td>{{ $inv->quantity }}</td>
-                            <td>৳{{ number_format($inv->total_amount, 2) }}</td>
-                            <td>৳{{ number_format($inv->paid_amount, 2) }}</td>
-                            <td>
-                                <strong class="text-danger">
-                                    ৳{{ number_format($remaining, 2) }}
-                                </strong>
-                            </td>
-                            <td>
-                                <span class="badge badge-{{ $inv->status == 'paid' ? 'success' : ($inv->status == 'inactive' ? 'danger' : 'warning') }}">
-                                    {{ ucfirst($inv->status) }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($remaining > 0)
-                                    <button class="btn btn-primary btn-sm" data-toggle="modal"
+                @foreach($investors as $key => $inv)
+                    @php
+                        $remaining = $inv->total_amount - $inv->paid_amount;
+                    @endphp
+                    <tr>
+                        <td>{{ $key + 1 }}</td>
+                        <td>{{ $inv->package->share_name }}</td>
+                        <td>{{ $inv->quantity }}</td>
+                        <td>৳{{ number_format($inv->total_amount, 2) }}</td>
+                        <td>৳{{ number_format($inv->paid_amount, 2) }}</td>
+                        <td>
+                            <strong class="text-danger">
+                                ৳{{ number_format($remaining, 2) }}
+                            </strong>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ $inv->status == 'paid' ? 'success' : ($inv->status == 'inactive' ? 'danger' : 'warning') }}">
+                                {{ ucfirst($inv->status) }}
+                            </span>
+                        </td>
+                        <td>
+                            @if($remaining > 0)
+                                <button class="btn btn-primary btn-sm"
+                                        data-toggle="modal"
                                         data-target="#payModal{{ $inv->id }}">
-                                        Pay Now
-                                    </button>
-                                @else
-                                    <span class="d-block text-center text-success">--</span>
-                                @endif
-                            </td>
-                        </tr>
+                                    Pay Now
+                                </button>
+                            @else
+                                <span class="d-block text-center text-success">--</span>
+                            @endif
+                        </td>
+                    </tr>
 
-                        <!-- PAYMENT MODAL -->
-                        <div class="modal fade" id="payModal{{ $inv->id }}" tabindex="-1">
-                            <div class="modal-dialog">
-                                <form action="{{ route('user.investor.pay', $inv->id) }}" method="POST">
-                                    @csrf
-                                    <div class="modal-content">
+                    <!-- PAYMENT MODAL -->
+                    <div class="modal fade" id="payModal{{ $inv->id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <form action="{{ route('user.investor.pay', $inv->id) }}" method="POST">
+                                @csrf
 
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Pay Installments / Advance</h5>
-                                            <button type="button" class="close" data-dismiss="modal">
-                                                <span>&times;</span>
-                                            </button>
-                                        </div>
+                                <div class="modal-content">
 
-                                        <div class="modal-body">
-                                            <p><strong>Total Amount:</strong> ৳{{ number_format($inv->total_amount, 2) }}</p>
-                                            <p><strong>Paid:</strong> ৳{{ number_format($inv->paid_amount, 2) }}</p>
-                                            <p><strong>Remaining:</strong>
-                                                <span class="text-danger">৳{{ number_format($remaining, 2) }}</span>
-                                            </p>
-                                            <p><strong>Your Wallet:</strong> ৳{{ number_format(auth()->user()->funding_wallet, 2) }}</p>
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Pay Installments / Advance</h5>
+                                        <button type="button" class="close" data-dismiss="modal">
+                                            <span>&times;</span>
+                                        </button>
+                                    </div>
 
-                                            <hr>
+                                    <div class="modal-body">
 
-                                            <label><strong>Enter Amount to Pay</strong></label>
-                                            <input type="number" step="0.01" name="amount" class="form-control"
-                                                placeholder="Example: {{ $remaining }}" required>
-                                        </div>
+                                        <p><strong>Total Amount:</strong>
+                                            ৳{{ number_format($inv->total_amount, 2) }}
+                                        </p>
 
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-success">Pay Now</button>
-                                        </div>
+                                        <p><strong>Paid:</strong>
+                                            ৳{{ number_format($inv->paid_amount, 2) }}
+                                        </p>
+
+                                        <p><strong>Remaining:</strong>
+                                            <span class="text-danger">
+                                                ৳{{ number_format($remaining, 2) }}
+                                            </span>
+                                        </p>
+
+                                        <p><strong>Your Wallet:</strong>
+                                            ৳{{ number_format(auth()->user()->funding_wallet, 2) }}
+                                        </p>
+
+                                        <hr>
+
+                                        <label><strong>Enter Amount to Pay</strong></label>
+
+                                        <input type="number"name="amount"class="form-control amount-input"min="1000"step="1000" pattern="[0-9]*" placeholder="Enter amount" required>
+
+                                        <small class="text-muted">
+                                            Amount must be in multiples of 1000
+                                        </small>
 
                                     </div>
-                                </form>
-                            </div>
-                        </div>
-                        <!-- END MODAL -->
 
-                    @endforeach
+                                    <div class="modal-footer">
+                                        <button type="button"
+                                                class="btn btn-secondary"
+                                                data-dismiss="modal">
+                                            Close
+                                        </button>
+                                        <button type="submit"
+                                                class="btn btn-success">
+                                            Pay Now
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- END MODAL -->
+
+                @endforeach
                 </tbody>
+
             </table>
         </div>
 
@@ -105,3 +135,19 @@
 </div>
 
 @endsection
+@push('scripts')
+
+
+<script>
+document.querySelectorAll('.amount-input').forEach(input => {
+    input.addEventListener('input', function () {
+        if (this.value && this.value % 1000 !== 0) {
+            this.setCustomValidity('Amount must be in multiples of 1000');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+});
+</script>
+
+@endpush
