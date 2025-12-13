@@ -119,7 +119,7 @@
               <li class="nav-item dropdown">
                 <a class="nav-link" id="profileDropdown" href="#" data-toggle="dropdown">
                 <div class="navbar-profile">
-                   <img src="{{ auth()->user()->image ? asset('public/storage/' . auth()->user()->image) : asset('profile.png') }}" alt="Profile Image" class="img-xs rounded-circle shadow bg-secondary border {{ auth()->user()->is_active == 1 ? 'border-success' : 'border-secondary' }}" style="object-fit: cover; border-width: 2px !important;" onerror="this.src='{{ url('assets/profile-icon.png') }}'">
+                   <img src="{{ auth()->user()->image ? asset('storage/' . auth()->user()->image) : asset('profile.png') }}" alt="Profile Image" class="img-xs rounded-circle shadow bg-secondary border {{ auth()->user()->is_active == 1 ? 'border-success' : 'border-secondary' }}" style="object-fit: cover; border-width: 2px !important;" onerror="this.src='{{ url('assets/profile-icon.png') }}'">
                     <p class="mb-0 d-none d-sm-block navbar-profile-name">{{ auth()->user()->name }}</p>
                     <i class="mdi mdi-menu-down d-none d-sm-block"></i>
                 </div>
