@@ -42,22 +42,67 @@ class UsersController extends Controller
     public function show($id)
     {
         $user = User::with(['referredBy', 'investors'])->findOrFail($id);
-        return view('admin.pages.users.show', compact('user'));
+
+        $userData = [
+            'name'           => $user->name,
+            'email'          => $user->email,
+            'mobile'         => $user->mobile,
+            'email_verified' => $user->email_verified_at ? 'Verified' : 'Not Verified',
+            'email_verified_badge' => $user->email_verified_at ? 'bg-success' : 'bg-danger',
+            'is_block'       => $user->is_block ? 'Yes' : 'No',
+            'is_block_badge' => $user->is_block ? 'bg-danger' : 'bg-success',
+            'is_active'      => $user->is_active ? 'Yes' : 'No',
+            'is_active_badge'=> $user->is_active ? 'bg-success' : 'bg-secondary',
+            'kyc_status'     => $user->kyc_status ? 'Approved' : 'Pending',
+            'kyc_status_badge'=> $user->kyc_status ? 'bg-success' : 'bg-danger',
+            'rank'           => match($user->rank) {
+                'rank1' => 'Land Pioneer',
+                'rank2' => 'Land Baron',
+                'rank3' => 'Land Magnate',
+                default => 'No Rank',
+            },
+            'club'           => match($user->club) {
+                'club1' => 'Greenfield Club',
+                'club2' => 'Prime Land Club',
+                'club3' => 'Elite Land Owners Club',
+                default => 'No Club',
+            },
+            'is_director'    => $user->is_director ? 'Yes' : 'No',
+            'is_director_badge' => $user->is_director ? 'bg-success' : 'bg-secondary',
+            'registered'     => $user->created_at->format('d-m-Y'),
+
+            // Investment summary
+            'total_invested_amount'    => $user->investors->sum('total_amount'),
+            'total_paid_amount'        => $user->investors->sum('paid_amount'),
+            'total_invest_count'       => $user->investors->count(),
+            'total_installment_amount' => $user->investors->where('purchase_type', 'installment')->sum('paid_amount'),
+            'total_installment_count'  => $user->investors->where('purchase_type', 'installment')->count(),
+        ];
+
+        return view('admin.pages.users.show', compact('user', 'userData'));
     }
+
 
     /**
      * Update user basic info
      */
+
     public function update(Request $request)
     {
         $user = User::findOrFail($request->user_id);
 
-        $validated = $request->validate([
+        $rules = [
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
             'mobile'   => 'required|string|max:20',
             'is_block' => 'required|boolean',
-        ]);
+        ];
+
+        if ($request->has('is_director')) {
+            $rules['is_director'] = 'required|boolean';
+        }
+
+        $validated = $request->validate($rules);
 
         $user->update($validated);
 
@@ -82,7 +127,7 @@ class UsersController extends Controller
 
         if ($request->action_type === 'add') {
             $user->$wallet = bcadd($user->$wallet, $amount, 8);
-        } else { 
+        } else {
             if (bccomp($user->$wallet, $amount, 8) < 0) {
                 return back()->with('error', 'Insufficient balance in the selected wallet.');
             }

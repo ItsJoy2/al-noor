@@ -23,53 +23,47 @@
                     <table class="table table-bordered">
                         <tr>
                             <th>Name</th>
-                            <td>{{ $user->name }}</td>
+                            <td>{{ $userData['name'] }}</td>
                         </tr>
                         <tr>
                             <th>Email</th>
-                            <td>{{ $user->email }}</td>
+                            <td>{{ $userData['email'] }}</td>
                         </tr>
                         <tr>
                             <th>Mobile</th>
-                            <td>{{ $user->mobile }}</td>
+                            <td>{{ $userData['mobile'] }}</td>
                         </tr>
                         <tr>
                             <th>Email Verified</th>
-                            <td>
-                                <span class="badge {{ $user->email_verified_at ? 'bg-success' : 'bg-danger' }}">
-                                    {{ $user->email_verified_at ? 'Verified' : 'Not Verified' }}
-                                </span>
-                            </td>
+                            <td><span class="badge {{ $userData['email_verified_badge'] }}">{{ $userData['email_verified'] }}</span></td>
                         </tr>
                         <tr>
                             <th>Blocked</th>
-                            <td>
-                                <span class="badge {{ $user->is_block ? 'bg-danger' : 'bg-success' }}">
-                                    {{ $user->is_block ? 'Yes' : 'No' }}
-                                </span>
-                            </td>
+                            <td><span class="badge {{ $userData['is_block_badge'] }}">{{ $userData['is_block'] }}</span></td>
                         </tr>
                         <tr>
                             <th>Active</th>
-                            <td>
-                                <span class="badge {{ $user->is_active ? 'bg-success' : 'bg-secondary' }}">
-                                    {{ $user->is_active ? 'Yes' : 'No' }}
-                                </span>
-                            </td>
+                            <td><span class="badge {{ $userData['is_active_badge'] }}">{{ $userData['is_active'] }}</span></td>
                         </tr>
-                        {{-- <tr>
+                        <tr>
                             <th>KYC Status</th>
-                            <td>
-                                <span class="badge {{ $user->kyc_status ? 'bg-success' : 'bg-danger' }}">
-                                    {{ $user->kyc_status ? 'Approved' : 'Pending' }}
-                                </span>
-                            </td>
-                        </tr> --}}
+                            <td><span class="badge {{ $userData['kyc_status_badge'] }}">{{ $userData['kyc_status'] }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Rank</th>
+                            <td><span class="badge bg-info">{{ $userData['rank'] }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Club</th>
+                            <td><span class="badge bg-primary">{{ $userData['club'] }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Director</th>
+                            <td><span class="badge {{ $userData['is_director_badge'] }}">{{ $userData['is_director'] }}</span></td>
+                        </tr>
                         <tr>
                             <th>Registered</th>
-                            <td>
-                                {{ $user->created_at->format('d-m-Y') }}
-                            </td>
+                            <td>{{ $userData['registered'] }}</td>
                         </tr>
                     </table>
 
@@ -84,7 +78,7 @@
                 {{-- WALLET + REFERRAL --}}
                 <div class="col-md-6">
 
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-between align-items-centert mt-4 mb-3">
                         <h5>Wallet Information</h5>
                         <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#walletUpdateModal">
                             Update Wallet
@@ -93,7 +87,7 @@
 
                     @include('admin.pages.users.__WalletUpdateModel')
 
-                    <table class="table table-bordered">
+                    <table class="table table-bordered mb-4">
                         <tr>
                             <th>Funding Wallet</th>
                             <td>৳{{ number_format($user->funding_wallet ?? 0, 2) }}</td>
@@ -104,7 +98,7 @@
                         </tr>
                     </table>
 
-                    <h5>Referral Info</h5>
+                    <h5 class="mt-4">Referral Info</h5>
                     <table class="table table-striped ">
                         <tr>
                             <th>Refer Code</th>
@@ -160,20 +154,24 @@
                     <h5>Investments Summary</h5>
                     <table class="table table-bordered">
                         <tr>
-                            <th>Total Invested</th>
-                            <td>
-                                ৳{{ number_format($user->investors->sum('total_amount'), 2) }}
-                            </td>
+                            <th>Total Invested Amount</th>
+                            <td>৳{{ number_format($userData['total_invested_amount'], 2) }}</td>
                         </tr>
                         <tr>
-                            <th>Total Paid</th>
-                            <td>
-                                ৳{{ number_format($user->investors->sum('paid_amount'), 2) }}
-                            </td>
+                            <th>Total Paid Amount</th>
+                            <td>৳{{ number_format($userData['total_paid_amount'], 2) }}</td>
                         </tr>
                         <tr>
-                            <th>Total Investments</th>
-                            <td>{{ $user->investors->count() }}</td>
+                            <th>Total Investment Count</th>
+                            <td>{{ $userData['total_invest_count'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Installment Paid Amount</th>
+                            <td>৳{{ number_format($userData['total_installment_amount'], 2) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Installment Count</th>
+                            <td>{{ $userData['total_installment_count'] }}</td>
                         </tr>
                     </table>
                 </div>
@@ -189,7 +187,7 @@
                 <div class="card-body">
 
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover table-bordered">
+                        <table class="table table-striped table-hover">
                             <thead class="table-dark">
                                 <tr>
                                     <th>#</th>
@@ -209,7 +207,7 @@
                                 <tr>
                                     <td>{{ $i + 1 }}</td>
 
-                                    <td>{{ $inv->package->plan_name ?? 'N/A' }}</td>
+                                    <td>{{ $inv->package->share_name ?? 'N/A' }}</td>
 
                                     <td>{{ ucfirst($inv->purchase_type) }}</td>
 

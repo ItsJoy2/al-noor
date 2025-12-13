@@ -10,8 +10,8 @@
     <title>{{ $generalSettings->app_name ?? 'Laravel Admin' }}</title>
 
     @if($generalSettings && $generalSettings->favicon)
-        <link rel="icon" type="image/png" href="{{ asset('public/storage/' . $generalSettings->favicon) }}">
-        <link rel="apple-touch-icon" href="{{ asset('public/storage/' . $generalSettings->favicon) }}">
+        <link rel="icon" type="image/png" href="{{ asset('storage/' . $generalSettings->favicon) }}">
+        <link rel="apple-touch-icon" href="{{ asset('storage/' . $generalSettings->favicon) }}">
     @else
         <link rel="icon" type="image/png" href="{{ asset('default-favicon.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('default-favicon.png') }}">

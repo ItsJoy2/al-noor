@@ -38,6 +38,15 @@
                             <option value="1" {{ $user->is_block ? 'selected' : '' }}>Blocked</option>
                         </select>
                     </div>
+
+                    <!-- Director Status -->
+                    <div class="mb-3">
+                        <label for="modal_is_director" class="form-label">Director Status</label>
+                        <select name="is_director" id="modal_is_director" class="form-control" required>
+                            <option value="0" {{ !$user->is_director ? 'selected' : '' }}>Not Director</option>
+                            <option value="1" {{ $user->is_director ? 'selected' : '' }}>Director</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="modal-footer">

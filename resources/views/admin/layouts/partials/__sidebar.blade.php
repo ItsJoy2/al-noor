@@ -6,7 +6,7 @@
         <div class="logo-header" data-background-color="dark">
             <a href="{{ route('admin.dashboard') }}" class="logo">
                 @if($generalSettings && $generalSettings->logo)
-                    <img src="{{ asset('public/storage/' . $generalSettings->logo) }}" alt="{{ $generalSettings->app_name ?? 'App Name' }}" class="navbar-brand" height="30">
+                    <img src="{{ asset('storage/' . $generalSettings->logo) }}" alt="{{ $generalSettings->app_name ?? 'App Name' }}" class="navbar-brand" height="30">
                 @endif
             </a>
             <div class="nav-toggle">
