@@ -33,7 +33,7 @@
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col">Username</th>
+                    <th scope="col">Email</th>
                     <th scope="col">Amount</th>
                     <th scope="col">Transaction Type</th>
                     <th scope="col">Description</th>
@@ -45,7 +45,7 @@
                 @forelse($transactions as $index => $transaction)
                     <tr>
                         <td>{{ $transactions->firstItem() + $index }}</td>
-                        <td>{{ $transaction->user->name ?? 'N/A' }}</td>
+                        <td>{{ $transaction->user->email ?? 'N/A' }}</td>
                         <td>৳{{ number_format($transaction->amount, 3) }}</td>
                         <td>{{ ucwords(str_replace('_', ' ', $transaction->remark)) }}</td>
                         <td>{{ $transaction->details }}</td>

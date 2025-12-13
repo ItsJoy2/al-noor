@@ -42,6 +42,7 @@ Route::prefix('user')->middleware('auth')->group(function () {
 
     Route::get('withdraw', [TransactionsController::class, 'showWithdrawForm'])->name('user.withdraw.index');
     Route::post('withdraw', [TransactionsController::class, 'withdraw'])->name('user.withdraw.submit');
+    Route::get('withdraw/history', [TransactionsController::class, 'withdrawalHistory'])->name('user.withdraw.history');
 
        //transfer
 
@@ -58,6 +59,15 @@ Route::prefix('user')->middleware('auth')->group(function () {
     Route::post('nominee', [AuthController::class, 'nominee'])->name('user.nominee.update');
     Route::post('change-password', [AuthController::class, 'changePassword'])->name('user.changePassword');
     Route::get('my-referrals', [UserController::class, 'directReferrals'])->name('user.direct.referrals');
+
+    // KYC
+    Route::get('kyc', [UserController::class, 'kycShow'])->name('user.kyc');
+    Route::post('kyc/submit', [UserController::class, 'submitKyc'])->name('user.kyc.submit');
+
+
+    Route::post('convert', [TransactionsController::class, 'convert'])->name('user.wallet.convert');
+    Route::get('convert', [TransactionsController::class, 'showConvertForm'])->name('user.wallet.convert.form');
+
 
 
 

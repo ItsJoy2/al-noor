@@ -50,8 +50,9 @@
             <div class="collapse" id="wallets">
               <ul class="nav flex-column sub-menu">
                 <li class="nav-item" > <a class="nav-link " href="{{ route('user.deposit.index') }}">Add Fund</a></li>
-                {{-- <li class="nav-item"> <a class="nav-link" href="{{ route('user.withdraw.index') }}">Make Withdraw</a></li> --}}
+                <li class="nav-item"> <a class="nav-link" href="{{ route('user.withdraw.index') }}">Make Withdraw</a></li>
                 <li class="nav-item"> <a class="nav-link" href="{{ route('user.transfer.form') }}">Fund Transfer</a></li>
+                <li class="nav-item"> <a class="nav-link" href="{{ route('user.wallet.convert') }}">Fund Convert</a></li>
               </ul>
             </div>
           </li>
@@ -63,23 +64,48 @@
               <span class="menu-title">Teamwork</span>
             </a>
           </li>
-          <li class="nav-item menu-items {{ request()->routeIs('user.deposit.history') ? 'active' : '' }}">
+          {{-- <li class="nav-item menu-items {{ request()->routeIs('user.deposit.history') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('user.deposit.history') }}">
                     <span class="menu-icon">
                     <i class="mdi mdi-bank"></i>
                     </span>
                     <span class="menu-title">Deposit History</span>
                 </a>
+            </li> --}}
+            <li class="nav-item menu-items {{ request()->routeIs('user.deposit.history') ? 'active' : '' }}">
+            <a class="nav-link" data-toggle="collapse" href="#history" aria-expanded="false" aria-controls="wallets">
+              <span class="menu-icon">
+                <i class="mdi mdi-history"></i>
+              </span>
+              <span class="menu-title">Histories</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="history">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item" > <a class="nav-link " href="{{ route('user.deposit.history') }}">deposit</a></li>
+                <li class="nav-item"> <a class="nav-link" href="{{ route('user.withdraw.history') }}">Withdraw</a></li>
+                <li class="nav-item"> <a class="nav-link" href="{{ route('user.transactions') }}">Transactions</a></li>
+              </ul>
+            </div>
+          </li>
+
+            <li class="nav-item menu-items ">
+                <a class="nav-link" href="">
+                    <span class="menu-icon">
+                        <i class="mdi mdi-account-check"></i>
+                    </span>
+                    <span class="menu-title">KYC</span>
+                </a>
             </li>
 
-          <li class="nav-item menu-items  {{ request()->routeIs('user.transactions') ? 'active' : '' }}">
+          {{-- <li class="nav-item menu-items  {{ request()->routeIs('user.transactions') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('user.transactions') }}">
               <span class="menu-icon">
                 <i class="mdi mdi-square-inc-cash"></i>
               </span>
               <span class="menu-title">Transactions</span>
             </a>
-          </li>
+          </li> --}}
 
         </ul>
       </nav>

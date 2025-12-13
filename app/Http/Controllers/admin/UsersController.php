@@ -53,7 +53,7 @@ class UsersController extends Controller
             'is_block_badge' => $user->is_block ? 'bg-danger' : 'bg-success',
             'is_active'      => $user->is_active ? 'Yes' : 'No',
             'is_active_badge'=> $user->is_active ? 'bg-success' : 'bg-secondary',
-            'kyc_status'     => $user->kyc_status ? 'Approved' : 'Pending',
+            'kyc_status'     => $user->kyc_status ? 'Verified' : 'Pending',
             'kyc_status_badge'=> $user->kyc_status ? 'bg-success' : 'bg-danger',
             'rank'           => match($user->rank) {
                 'rank1' => 'Land Pioneer',

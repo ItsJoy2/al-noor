@@ -33,10 +33,10 @@
                             <th>Mobile</th>
                             <td>{{ $userData['mobile'] }}</td>
                         </tr>
-                        <tr>
+                        {{-- <tr>
                             <th>Email Verified</th>
                             <td><span class="badge {{ $userData['email_verified_badge'] }}">{{ $userData['email_verified'] }}</span></td>
-                        </tr>
+                        </tr> --}}
                         <tr>
                             <th>Blocked</th>
                             <td><span class="badge {{ $userData['is_block_badge'] }}">{{ $userData['is_block'] }}</span></td>

@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kyc', function (Blueprint $table) {
+        Schema::create('kycs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('name');
-            $table->foreignId('user_id')->constrained('users');
-            $table->string('nid_front');
+            $table->string('nid_passport_number')->unique();
+            $table->string('nid_passport_front');
+            $table->string('nid_back')->nullable();
             $table->string('selfie');
-            $table->string('details')->nullable();
+            $table->text('note')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
+
     }
 
     /**
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kyc');
+        Schema::dropIfExists('kycs');
     }
 };

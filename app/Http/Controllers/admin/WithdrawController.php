@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Transactions;
 use App\Models\User;
+use App\Models\Withdrawal;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
 
 class WithdrawController extends Controller
@@ -15,48 +15,49 @@ class WithdrawController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Transactions::where('remark', 'withdrawal')->whereIn('status', ['Completed','Paid']);
+        $query = Withdrawal::query();
 
-        // if ($request->filled('filter')) {
-        //     $query->where('status', $request->filter);
-        // }
+        if ($request->filled('filter')) {
+            $query->where('status', $request->filter);
+        }
 
         if ($request->filled('search')) {
             $search = $request->search;
 
             $query->where(function ($q) use ($search) {
-                $q->where('transaction_id', 'LIKE', "%{$search}%")
-                ->orWhere('details', 'LIKE', "%{$search}%")
-                ->orWhereHas('user', function ($userQuery) use ($search) {
-                    $userQuery->where('name', 'LIKE', "%{$search}%")
+                $q->where('id', 'LIKE', "%{$search}%")
+                  ->orWhere('details', 'LIKE', "%{$search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'LIKE', "%{$search}%")
                                 ->orWhere('email', 'LIKE', "%{$search}%");
-                });
+                  });
             });
         }
 
-        $withdrawals = $query->orderBy('created_at', 'desc')->paginate(10);
+        $withdrawals = $query->with('user')->orderBy('created_at', 'desc')->paginate(10);
 
         return view('admin.pages.withdraw.index', compact('withdrawals'));
     }
 
-    // public function update(Request $request,$id)
-    // {
-    //     $request->validate([
-    //         'status' => 'required|in:pending,completed,rejected',
-    //     ]);
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,approved,rejected',
+            'note' => 'nullable|string|max:1000',
+        ]);
 
-    //     $withdraw = Transactions::findOrFail($id);
-    //     if ($request->status == 'rejected') {
-    //         User::where('id', $withdraw->user_id)->increment('wallet', $withdraw->amount);
-    //         $withdraw->status = $request->status;
-    //         $withdraw->save();
-    //         return redirect()->route('withdraw.index')->with('success', 'Withdrawal status updated.');
-    //     }
-    //     $withdraw->status = $request->status;
-    //     $withdraw->save();
+        $withdraw = Withdrawal::findOrFail($id);
 
-    //     return redirect()->route('withdraw.index')->with('success', 'Withdrawal status updated.');
-    // }
+        if ($request->status == 'rejected' && $withdraw->status != 'rejected') {
+            User::where('id', $withdraw->user_id)->increment('funding_wallet', $withdraw->amount);
+        }
+
+        $withdraw->status = $request->status;
+        $withdraw->note = $request->note;
+        $withdraw->save();
+
+        return redirect()->route('admin.withdraw.index')->with('success', 'Withdrawal updated successfully.');
+    }
 
     /**
      * Show the form for creating a new resource.

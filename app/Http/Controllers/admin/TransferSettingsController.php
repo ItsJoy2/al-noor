@@ -16,7 +16,6 @@ class TransferSettingsController extends Controller
 
     public function update(Request $request)
     {
-        // Validate only the existing fields
         $validated = $request->validate([
             'min_transfer' => 'required|numeric|min:0',
             'max_transfer' => 'required|numeric|min:0|gte:min_transfer',

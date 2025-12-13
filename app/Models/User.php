@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Investor;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
@@ -104,10 +105,18 @@ class User extends Authenticatable
     {
         return $this->hasMany(Deposit::class);
     }
-    
+
     public function nominees(): HasMany
     {
         return $this->hasMany(Nominee::class);
+    }
+    public function kyc()
+    {
+        return $this->hasOne(Kyc::class);
+    }
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class);
     }
 
 }

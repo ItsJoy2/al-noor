@@ -1,194 +1,170 @@
 @extends('admin.layouts.app')
 
 @section('content')
-    <div class="card">
-        <div class="card-header">
-            <h4 class="card-title mb-0">All Withdrawals</h4>
-        </div>
+<div class="card">
+    <div class="card-header mb-4">
+        <h4 class="card-title mb-0">All Withdrawals</h4>
+    </div>
 
-        <div class="card-body table-responsive">
-            {{-- <form method="GET" action="{{ route('withdraw.index') }}" class="mb-3">
-                <div class="row">
-                    <div class="col-md-4">
-                        <select name="filter" class="form-control">
-                            <option value="">-- Filter Status --</option>
-                            <option value="pending" {{ request('filter') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="rejected" {{ request('filter') == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                            <option value="completed" {{ request('filter') == 'completed' ? 'selected' : '' }}>Completed</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-primary" type="submit">Filter</button>
-                        <a href="{{ route('withdraw.index') }}" class="btn btn-secondary">Reset</a>
-                    </div>
-                </div>
-            </form> --}}
+        {{-- Search Form --}}
+        <form method="GET" action="{{ route('admin.withdraw.index') }}" class="d-flex justify-content-end mb-3 px-4" style="max-width: 300px; margin-left: auto;">
+            <div class="input-group input-group-sm">
+                <input type="text" name="search" class="form-control" placeholder="Search by user or transaction..." value="{{ request('search') }}">
+                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+            </div>
+        </form>
 
-            <form method="GET" action="{{ route('admin.withdraw.index') }}" class="d-flex justify-content-end mb-3" style="max-width: 300px; margin-left: auto;">
-                <div class="input-group input-group-sm">
-                    <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ request('search') }}">
-                    <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                </div>
-            </form>
-
-            <table class="table table-striped table-hover mt-3">
-                <thead class="thead-dark">
+    <div class="card-body table-responsive">
+        <table class="table table-striped table-hover mt-4">
+            <thead class="thead-dark">
                 <tr>
                     <th>#</th>
-                    <th>Wallet Address</th>
                     <th>User</th>
-                    <th>Amount</th>
+                    <th>Wallet / Account</th>
+                    <th>Method</th>
+                    <th>Net Amount</th>
                     <th>Charge</th>
                     <th>Status</th>
                     <th>Created At</th>
-                    {{-- <th>Action</th> --}}
+                    <th>Action</th>
                 </tr>
-                </thead>
-                <tbody>
-                @forelse ($withdrawals as $index => $withdraw)
-                    <tr>
-                        <td>{{ $index + $withdrawals->firstItem() }}</td>
-                        <td class="d-flex">
-                            <span id="details-{{ $withdraw->id }}">{{ $withdraw->details }}</span>
-                            <button class="btn btn-sm copy-btn"
-                                    data-copy-target="details-{{ $withdraw->id }}"
-                                    title="Copy"
-                                    style="margin-left: 5px; padding-bottom: 23px;">
-                                <i class="fas fa-copy" style="line-height: 0;"></i>
-                            </button>
-                        </td>
+            </thead>
+            <tbody>
+            @forelse ($withdrawals as $index => $withdraw)
+                @php
+                    $details = $withdraw->details ?? [];
+                    $mainValue = $details['account'] ?? $details['account_number'] ?? $details['wallet_address'] ?? '-';
+                @endphp
+                <tr>
+                    <td>{{ $index + $withdrawals->firstItem() }}</td>
+                    <td>{{ $withdraw->user->email ?? 'N/A' }}</td>
+                    <td class="d-flex align-items-center">
+                        <span id="details-{{ $withdraw->id }}">{{ $mainValue }}</span>
+                        <button class="btn btn-sm btn-outline-secondary ms-2 copy-btn" data-copy-target="details-{{ $withdraw->id }}" title="Copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </td>
+                    <td>{{ $withdraw->method}}</td>
+                    <td>${{ number_format($withdraw->total_amount, 2) }}</td>
+                    <td>${{ number_format($withdraw->charge, 2) }}</td>
+                    <td>
+                        @php
+                            $badge = match($withdraw->status) {
+                                'pending' => 'warning',
+                                'rejected' => 'danger',
+                                'approved' => 'success',
+                                default => 'secondary',
+                            };
+                        @endphp
+                        <span class="badge bg-{{ $badge }}">{{ ucfirst($withdraw->status) }}</span>
+                    </td>
+                    <td>{{ $withdraw->created_at?->format('d M Y') }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#withdrawModal{{ $withdraw->id }}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        @if($withdraw->status != 'approved')
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#withdrawModal{{ $withdraw->id }}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        @endif
+                    </td>
+                </tr>
 
-                        <td>{{ $withdraw->user->name ?? 'N/A' }}</td>
-                        <td>${{ number_format($withdraw->amount, 3) }}</td>
-                        <td>${{ number_format($withdraw->charge, 3) }}</td>
-
-                        <td>
-                            <span class="badge
-                                @if($withdraw->status == 'Pending') badge-warning
-                                @elseif($withdraw->status == 'Rejected') badge-danger
-                                @else badge-success @endif">
-                                {{ ucfirst($withdraw->status) }}
-                            </span>
-                        </td>
-                        <td>{{ $withdraw->created_at?->format('Y-m-d H:i') }}</td>
-                       {{-- @if($withdraw->status == 'Pending')
-                            <td>
-                                <button type="button"
-                                        class="btn btn-sm btn-primary"
-                                        data-toggle="modal"
-                                        data-target="#actionModal{{ $withdraw->id }}">
-                                    <i class="fas fa-edit"></i> Manage
-                                </button>
-                            </td>
-                        @else
-                        <td class="text-center">--</td>
-                       @endif --}}
-                    </tr>
-
-                    <!-- Modal -->
-                    {{-- <div class="modal fade" id="actionModal{{ $withdraw->id }}" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <form method="POST" action="{{ route('withdraw.update', $withdraw->id) }}">
-                                @csrf
-                                @method('PUT')
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Update Withdrawal Status</h5>
-                                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                {{-- Modal --}}
+                <div class="modal fade" id="withdrawModal{{ $withdraw->id }}" tabindex="-1" aria-labelledby="withdrawModalLabel{{ $withdraw->id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="withdrawModalLabel{{ $withdraw->id }}">Withdrawal Details (#{{ $withdraw->id }})</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <h6>User Info</h6>
+                                        <p>{{ $withdraw->user->name ?? 'N/A' }}<br>{{ $withdraw->user->email ?? '' }}</p>
                                     </div>
-                                    <div class="modal-body">
-                                        <input type="hidden" name="id" value="{{ $withdraw->id }}">
-                                        <div class="form-group">
-                                            <label>Withdrawal Address</label>
-                                            <input type="text" class="form-control" value="{{ $withdraw->details }}" readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Transaction ID</label>
-                                            <input type="text" class="form-control" value="{{ $withdraw->transaction_id }}" readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Status</label>
-                                            <select name="status" class="form-control">
-                                                <option value="pending" {{ $withdraw->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                <option value="rejected" {{ $withdraw->status == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                                                <option value="completed" {{ $withdraw->status == 'completed' ? 'selected' : '' }}>Completed</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-success">Update</button>
+                                    <div class="col-md-6">
+                                        <h6>Amounts</h6>
+                                        <p>Amount: ${{ number_format($withdraw->amount,2) }}<br>
+                                           Charge: ${{ number_format($withdraw->charge,2) }}<br>
+                                           Net: ${{ number_format($withdraw->total_amount,2) }}</p>
                                     </div>
                                 </div>
-                            </form>
+
+                                <h6>Withdrawal Details</h6>
+                                <ul>
+                                    @foreach($details as $key => $value)
+                                        <li><strong>{{ ucfirst(str_replace('_',' ',$key)) }}:</strong> {{ $value }}</li>
+                                    @endforeach
+                                </ul>
+
+                                <h6>Status</h6>
+                                <span class="badge bg-{{ $withdraw->status=='pending'?'warning':($withdraw->status=='approved'?'success':'danger') }}">{{ ucfirst($withdraw->status) }}</span>
+
+                                @if($withdraw->status != 'approved')
+                                <hr>
+                                <form action="{{ route('admin.withdraw.update', $withdraw->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="mb-3">
+                                        <label for="status{{ $withdraw->id }}" class="form-label">Update Status</label>
+                                        <select name="status" id="status{{ $withdraw->id }}" class="form-select">
+                                            <option value="pending" {{ $withdraw->status=='pending'?'selected':'' }}>Pending</option>
+                                            <option value="approved" {{ $withdraw->status=='approved'?'selected':'' }}>Approved</option>
+                                            <option value="rejected" {{ $withdraw->status=='rejected'?'selected':'' }}>Rejected</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="note{{ $withdraw->id }}" class="form-label">Admin Note</label>
+                                        <textarea name="note" id="note{{ $withdraw->id }}" class="form-control" rows="3">{{ $withdraw->note }}</textarea>
+                                    </div>
+                                    <button class="btn btn-primary" type="submit">Save Changes</button>
+                                </form>
+                                @endif
+                            </div>
                         </div>
-                    </div> --}}
+                    </div>
+                </div>
 
-                @empty
-                    <tr>
-                        <td colspan="8" class="text-center">No withdrawals found.</td>
-                    </tr>
-                @endforelse
-                </tbody>
-            </table>
+            @empty
+                <tr>
+                    <td colspan="9" class="text-center">No withdrawals found.</td>
+                </tr>
+            @endforelse
+            </tbody>
+        </table>
 
-            <div class="mt-3">
-                {{ $withdrawals->appends(request()->query())->links('admin.layouts.partials.__pagination') }}
-            </div>
+        {{-- Pagination --}}
+        <div class="mt-3">
+            {{ $withdrawals->appends(request()->query())->links('admin.layouts.partials.__pagination') }}
         </div>
 
-        @if(session('success'))
-            <script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: '{{ session('success') }}',
-                    confirmButtonColor: '#3085d6',
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-            </script>
-        @endif
-
-        @if(session('error'))
-            <script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: '{{ session('error') }}',
-                    confirmButtonColor: '#d33',
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-            </script>
-        @endif
     </div>
-@endsection
+</div>
 
-
+{{-- Copy to clipboard --}}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const copyButtons = document.querySelectorAll('.copy-btn');
-
-        copyButtons.forEach(button => {
-            button.addEventListener('click', function () {
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
                 const targetId = this.getAttribute('data-copy-target');
-                const textToCopy = document.getElementById(targetId).innerText;
+                const text = document.getElementById(targetId).innerText;
 
-                // কপি টেক্সট
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    // SweetAlert2 ব্যবহার করলে এই অংশ কাজ করবে
+                navigator.clipboard.writeText(text).then(() => {
                     Swal.fire({
                         icon: 'success',
                         title: 'Copied!',
-                        text: 'Wallet address copied to clipboard!',
+                        text: 'Wallet/Account copied to clipboard.',
                         timer: 1500,
                         showConfirmButton: false
                     });
-                }).catch(err => {
+                }).catch(() => {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
-                        text: 'Failed to copy!',
+                        text: 'Failed to copy.',
                         timer: 1500,
                         showConfirmButton: false
                     });
@@ -197,3 +173,4 @@
         });
     });
 </script>
+@endsection

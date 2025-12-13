@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\kyc;
+use App\Models\Kyc;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
 
 class KycController extends Controller
@@ -15,32 +15,36 @@ class KycController extends Controller
      */
     public function index(Request $request)
     {
-        $status = $request->status;
-        $page = $request->page ?? 1;
+        $status = $request->get('status');
+        $page   = $request->get('page', 1);
 
         $cacheKey = "kycs_{$status}_page_{$page}";
 
         $kycs = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($status) {
-            $query = Kyc::query();
+
+            $query = Kyc::with('user')->latest();
 
             if ($status && in_array($status, ['pending', 'approved', 'rejected'])) {
                 $query->where('status', $status);
             }
 
-            return $query->latest()->paginate(10);
+            return $query->paginate(10);
         });
 
-        return view('admin.pages.kyc.index', compact('kycs'));
+        return view('admin.pages.kyc.index', compact('kycs', 'status'));
     }
 
     /**
      * Show the form for editing the specified KYC application.
      */
-    public function edit(string $id)
-    {
-        $kyc = Kyc::findOrFail($id);
-        return view('admin.pages.kyc.edit', compact('kyc'));
-    }
+public function edit(string $id)
+{
+    // Retrieve the KYC record by ID
+    $kyc = Kyc::findOrFail($id);
+
+    // Pass it to the admin edit view
+    return view('admin.pages.kyc.edit', compact('kyc'));
+}
 
     /**
      * Update the specified KYC application in storage and clear related cache.
@@ -49,21 +53,31 @@ class KycController extends Controller
     {
         $request->validate([
             'status' => 'required|in:pending,approved,rejected',
-            'details' => 'nullable|string|max:1000',
+            'note'   => 'nullable|string|max:1000',
         ]);
 
         $kyc = Kyc::findOrFail($id);
+
+        if ($kyc->status === 'approved') {
+            return redirect()->route('admin.kyc.index')->with('error', 'This KYC is already approved and cannot be modified.');
+        }
+
         $kyc->status = $request->status;
-        $kyc->details = $request->details;
-        $user = User::findOrFail($kyc->user_id);
-        $user->kyc_status = "1";
-        $user->save();
+        $kyc->note   = $request->note;
         $kyc->save();
+
+        $user = User::findOrFail($kyc->user_id);
+        $user->kyc_status = $request->status === 'approved' ? 1 : 0;
+        $user->save();
 
         Cache::flush();
 
-        return redirect()->route('admin.kyc.index')->with('success', 'KYC status updated successfully.');
+        return redirect()
+            ->route('admin.kyc.index')
+            ->with('success', 'KYC status updated successfully.');
     }
+
+
 
     /**
      * Not used but required for resource controller.

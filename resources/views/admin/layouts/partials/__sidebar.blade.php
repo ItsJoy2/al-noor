@@ -123,9 +123,9 @@
 
 
                 <!-- KYC -->
-                {{-- @php
-                    use App\Models\kyc;
-                    $pendingCount = kyc::where('status', 'pending')->count();
+                @php
+                    use App\Models\Kyc;
+                    $pendingCount = Kyc::where('status', 'pending')->count();
                 @endphp
 
                 <li class="nav-item {{ Str::contains(request()->path(), 'kyc') ? 'active' : '' }}">
@@ -141,7 +141,7 @@
             </span>
                         @endif
                     </a>
-                </li> --}}
+                </li>
 
 
 

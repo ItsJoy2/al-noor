@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\user;
 
+use App\Models\Kyc;
 use App\Models\Club;
 use App\Models\User;
 use App\Models\Founder;
@@ -16,9 +17,10 @@ use App\Models\ActivationSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Service\TransactionService;
-use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -29,10 +31,10 @@ class UserController extends Controller
     {
         return $this->userService->UserProfile($request);
     }
-    public function kyc(Request $request): JsonResponse
-    {
-        return $this->userService->UserKyc($request);
-    }
+    // public function kyc(Request $request): JsonResponse
+    // {
+    //     return $this->userService->UserKyc($request);
+    // }
     public function showActivation()
     {
         $activationSetting = ActivationSetting::first();
@@ -155,6 +157,60 @@ class UserController extends Controller
         }
 
         return view('user.pages.teamwork.index', compact('referrals', 'statusFilter'));
+    }
+
+
+
+    public function kycShow()
+    {
+        $kyc = auth()->user()->kyc;
+
+        return view('user.pages.profile.kyc', compact('kyc'));
+    }
+
+    public function submitKyc(Request $request)
+    {
+        $user = Auth::user();
+
+
+        if ($user->kyc && in_array($user->kyc->status, ['pending','approved'])) {
+            return back()->with('error', 'You cannot resubmit KYC now.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'nid_passport_number' => 'required|string|unique:kycs,nid_passport_number,' . ($user->kyc->id ?? 'NULL'),
+            'nid_passport_front' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'nid_back' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'selfie' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $frontPath = Storage::disk('public')->put('kyc/front', $request->file('nid_passport_front'));
+        $backPath = $request->hasFile('nid_back') ? Storage::disk('public')->put('kyc/back', $request->file('nid_back')) : null;
+        $selfiePath = Storage::disk('public')->put('kyc/selfie', $request->file('selfie'));
+
+        if ($user->kyc && $user->kyc->status === 'rejected') {
+            $user->kyc->update([
+                'name' => $validated['name'],
+                'nid_passport_number' => $validated['nid_passport_number'],
+                'nid_passport_front' => $frontPath,
+                'nid_back' => $backPath,
+                'selfie' => $selfiePath,
+                'status' => 'pending',
+            ]);
+        } else {
+            Kyc::create([
+                'user_id' => $user->id,
+                'name' => $validated['name'],
+                'nid_passport_number' => $validated['nid_passport_number'],
+                'nid_passport_front' => $frontPath,
+                'nid_back' => $backPath,
+                'selfie' => $selfiePath,
+                'status' => 'pending',
+            ]);
+        }
+
+        return back()->with('success', 'KYC submitted successfully. Awaiting admin approval.');
     }
 
 }
