@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\withdraw_settings;
+use App\Models\WithdrawSetting;
+use App\Http\Controllers\Controller;
 
 class WithdrawSettingsController extends Controller
 {
     public function index()
     {
-        $settings = withdraw_settings::first();
+        $settings = WithdrawSetting::first();
         return view('admin.pages.withdraw.settings', compact('settings'));
     }
 
@@ -23,7 +23,7 @@ class WithdrawSettingsController extends Controller
             'status' => 'required|in:0,1',
         ]);
 
-        $settings = withdraw_settings::first(); // Assuming only 1 row
+        $settings = WithdrawSetting::first(); // Assuming only 1 row
         $settings->update($request->only(['min_withdraw', 'max_withdraw', 'charge', 'status']));
 
         return redirect()->back()->with('success', 'Withdraw settings updated successfully.');

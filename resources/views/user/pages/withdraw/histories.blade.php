@@ -45,9 +45,9 @@
                         @endforeach
                     @endif
                 </td>
-                <td>${{ number_format($withdrawal->amount, 2) }}</td>
-                <td>${{ number_format($withdrawal->charge, 2) }}</td>
-                <td>${{ number_format($withdrawal->total_amount, 2) }}</td>
+                <td>৳{{ number_format($withdrawal->amount, 2) }}</td>
+                <td>৳{{ number_format($withdrawal->charge, 2) }}</td>
+                <td>৳{{ number_format($withdrawal->total_amount, 2) }}</td>
                 <td>{{ $withdrawal->note ?? '-' }}</td>
                 <td>
                     @php

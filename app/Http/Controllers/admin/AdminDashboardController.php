@@ -9,7 +9,10 @@ use App\Models\Invoice;
 use App\Models\Investor;
 use Illuminate\View\View;
 use App\Models\PoolWallet;
+use App\Models\Withdrawal;
 use App\Models\Transactions;
+use Illuminate\Support\Carbon;
+use App\Models\WithdrawSetting;
 use App\Models\withdraw_settings;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
@@ -20,12 +23,12 @@ class AdminDashboardController extends Controller
     {
 
         $dashboardData = Cache::remember('admin_dashboard_data', now()->hour(1), function () {
-            
+
             $totalShares = 20000;
             $totalSoldShares = Investor::sum('quantity');
             $installmentShares = Investor::where('purchase_type', 'installment')->sum('quantity');
 
-            $withdrawSettings = withdraw_settings::first();
+            $withdrawSettings = WithdrawSetting::first();
             $chargePercent = $withdrawSettings ? $withdrawSettings->charge : 0;
             $totalNetWithdrawals = Transactions::where('remark', 'withdrawal')->where('status', 'Completed')->sum('amount');
             $withdrawChargeAmount = $chargePercent > 0 ? $totalNetWithdrawals * $chargePercent / (100 - $chargePercent) : 0;
@@ -53,10 +56,10 @@ class AdminDashboardController extends Controller
 
 
                 // withdrawal
-                'totalWithdrawals' => Transactions::where('remark', 'withdrawal')->where('status', 'Completed')->sum('amount'),
-                'todayWithdrawals' => Transactions::where('remark', 'withdrawal')->where('status', 'Completed')->whereDate('created_at', today())->sum('amount'),
-                'last30DaysWithdrawals' => Transactions::where('remark', 'withdrawal')->where('status', 'Completed')->whereBetween('created_at', [now()->subDays(30), today()])->sum('amount'),
-                'withdrawChargeAmount' => $withdrawChargeAmount,
+                'totalWithdrawals' => Withdrawal::where('status', 'approved')->sum('total_amount'),
+                'pendingWithdrawals' => Withdrawal::where('status', 'pending')->sum('total_amount'),
+                'todayWithdrawals' => Withdrawal::where('status', 'approved')->whereDate('created_at', Carbon::today())->sum('total_amount'),
+                'withdrawChargeAmount' => Withdrawal::where('status', 'approved')->sum('charge'),
 
                 // Investment
                 'totalFullPayment'       => Investor::where('purchase_type', 'full')->sum('total_amount'),

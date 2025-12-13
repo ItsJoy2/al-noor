@@ -45,8 +45,8 @@
                         </button>
                     </td>
                     <td>{{ $withdraw->method}}</td>
-                    <td>${{ number_format($withdraw->total_amount, 2) }}</td>
-                    <td>${{ number_format($withdraw->charge, 2) }}</td>
+                    <td>৳{{ number_format($withdraw->total_amount, 2) }}</td>
+                    <td>৳{{ number_format($withdraw->charge, 2) }}</td>
                     <td>
                         @php
                             $badge = match($withdraw->status) {
@@ -87,9 +87,9 @@
                                     </div>
                                     <div class="col-md-6">
                                         <h6>Amounts</h6>
-                                        <p>Amount: ${{ number_format($withdraw->amount,2) }}<br>
-                                           Charge: ${{ number_format($withdraw->charge,2) }}<br>
-                                           Net: ${{ number_format($withdraw->total_amount,2) }}</p>
+                                        <p>Amount: ৳{{ number_format($withdraw->amount,2) }}<br>
+                                           Charge: ৳{{ number_format($withdraw->charge,2) }}<br>
+                                           Net: ৳{{ number_format($withdraw->total_amount,2) }}</p>
                                     </div>
                                 </div>
 

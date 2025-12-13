@@ -146,8 +146,8 @@
                 <h5 class="card-title fw-bold mb-4">Withdrawals</h5>
                 <div class="row g-4">
                     <x-dashboard.stat-card icon="fas fa-credit-card" value="৳{{$dashboardData['totalWithdrawals']}}" label="Total Withdrawn" bg="success" />
-                    <x-dashboard.stat-card icon="fas fa-credit-card" value="৳{{$dashboardData['todayWithdrawals']}}" label="Today  Withdrawals" bg="warning" />
-                    <x-dashboard.stat-card icon="fas fa-credit-card" value="৳{{$dashboardData['last30DaysWithdrawals']}}" label="Last 30 days Withdrawals" bg="info" />
+                    <x-dashboard.stat-card icon="fas fa-credit-card" value="৳{{$dashboardData['pendingWithdrawals']}}" label="Pending  Withdrawals" bg="danger" />
+                    <x-dashboard.stat-card icon="fas fa-credit-card" value="৳{{$dashboardData['todayWithdrawals']}}" label="Today Withdrawals" bg="info" />
                     <x-dashboard.stat-card icon="fas fa-percent" value="৳{{number_format($dashboardData['withdrawChargeAmount'], 2)}}" label="Total Withdrawal Charge" bg="secondary" />
                 </div>
             </div>
