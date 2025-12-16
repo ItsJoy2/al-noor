@@ -23,13 +23,22 @@
                             type="button" role="tab">
                         <i class="fas fa-level-up-alt me-2"></i> Level Bonuses
                     </button>
-
                     <button class="nav-link" id="v-pills-pool-tab"
                             data-bs-toggle="pill" data-bs-target="#v-pills-pool"
                             type="button" role="tab">
                         <i class="fas fa-users me-2"></i> Pool Bonuses
                     </button>
+                    <button class="nav-link" id="v-pills-rank-tab"
+                            data-bs-toggle="pill" data-bs-target="#v-pills-rank"
+                            type="button" role="tab">
+                        <i class="fas fa-award me-2"></i> Rank Distribution
+                    </button>
 
+                    <button class="nav-link" id="v-pills-club-tab"
+                            data-bs-toggle="pill" data-bs-target="#v-pills-club"
+                            type="button" role="tab">
+                        <i class="fas fa-star me-2"></i> Club Distribution
+                    </button>
                     <button class="nav-link" id="v-pills-other-tab"
                             data-bs-toggle="pill" data-bs-target="#v-pills-other"
                             type="button" role="tab">
@@ -78,6 +87,51 @@
                                             <input type="number" step="0.01" name="{{ $pool }}"
                                                    value="{{ $bonus->$pool }}"
                                                    class="form-control">
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Rank Distribution Tab   --}}
+                    <div class="tab-pane fade" id="v-pills-rank" role="tabpanel">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Rank Distribution (%)</h5>
+
+                                <div class="row">
+                                    @foreach (['rank1_percent','rank2_percent','rank3_percent'] as $rank)
+                                        <div class="col-md-6 mb-3">
+                                            <label>{{ ucwords(str_replace('_',' ',$rank)) }} (%)</label>
+                                            <input type="number" step="0.01"
+                                                name="{{ $rank }}"
+                                                value="{{ $bonus->$rank }}"
+                                                class="form-control">
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Club Distribution Tab  --}}
+
+                    <div class="tab-pane fade" id="v-pills-club" role="tabpanel">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Club Distribution (%)</h5>
+
+                                <div class="row">
+                                    @foreach (['club1_percent','club2_percent','club3_percent'] as $club)
+                                        <div class="col-md-6 mb-3">
+                                            <label>{{ ucwords(str_replace('_',' ',$club)) }} (%)</label>
+                                            <input type="number" step="0.01"
+                                                name="{{ $club }}"
+                                                value="{{ $bonus->$club }}"
+                                                class="form-control">
                                         </div>
                                     @endforeach
                                 </div>

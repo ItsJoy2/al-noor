@@ -18,5 +18,11 @@ class BonusSetting extends Model
         'director_pool',
         'reactivation_charge',
         'max_pending_installments',
+        'club1_percent',
+        'club2_percent',
+        'club3_percent',
+        'rank1_percent',
+        'rank2_percent',
+        'rank3_percent',
     ];
 }

@@ -90,7 +90,13 @@
                         @endif
                     </a>
                 </li>
-
+                <!-- Bonus Distribution -->
+                <li class="nav-item {{ Str::contains(request()->path(), 'distribute') ? 'active' : '' }}">
+                    <a href="{{ route('admin.distribute.index') }}">
+                        <i class="fas fa-coins"></i>
+                        <p>Bonus Distribution</p>
+                    </a>
+                </li>
                 <!-- Transactions -->
                 <li class="nav-item {{ Str::contains(request()->path(), 'transactions') ? 'active' : '' }}">
                     <a href="{{ route('admin.transactions.index') }}">

@@ -46,7 +46,7 @@
                     <tr>
                         <td>{{ $transactions->firstItem() + $index }}</td>
                         <td>{{ $transaction->user->email ?? 'N/A' }}</td>
-                        <td>৳{{ number_format($transaction->amount, 3) }}</td>
+                        <td>৳{{ number_format($transaction->amount, 2) }}</td>
                         <td>{{ ucwords(str_replace('_', ' ', $transaction->remark)) }}</td>
                         <td>{{ $transaction->details }}</td>
                         <td>{{ ucfirst($transaction->status) }}</td>

@@ -14,6 +14,7 @@ use App\Http\Controllers\admin\TransactionsController;
 use App\Http\Controllers\admin\DepositMethodController;
 use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\GeneralSettingsController;
+use App\Http\Controllers\admin\PoolDistributionController;
 use App\Http\Controllers\admin\TransferSettingsController;
 use App\Http\Controllers\admin\WithdrawSettingsController;
 use App\Http\Controllers\admin\AuthenticatedSessionController;
@@ -142,6 +143,13 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
     Route::get('profile', [AuthenticatedSessionController::class, 'profileEdit'])->name('admin.profile.edit');
     Route::post('profile', [AuthenticatedSessionController::class, 'profileUpdate'])->name('admin.profile.update');
+
+    //pool Distribution settings
+    Route::get('distribute', [PoolDistributionController::class, 'index'])->name('admin.distribute.index');
+    Route::post('distribute-rank', [PoolDistributionController::class, 'distributeRankPool'])->name('admin.distribute-rank');
+    Route::post('distribute-club',[PoolDistributionController::class, 'distributeClubPool'])->name('admin.distribute-club');
+    Route::post('distribute-shareholder',[PoolDistributionController::class, 'distributeShareholderPool'])->name('admin.distribute-shareholder');
+    Route::post('distribute-director',[PoolDistributionController::class, 'distributeDirectorPool'])->name('admin.distribute-director');
 
 });
 
