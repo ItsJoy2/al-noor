@@ -20,28 +20,46 @@ use App\Http\Controllers\Controller;
 class PurchaseController extends Controller
 {
     // Show all share packages
-public function index()
-{
-    $user = auth()->user();
+    public function index()
+    {
+        $user = auth()->user();
 
-    $packages = Package::where('status', 'active')
-        ->orderBy('id', 'ASC')
-        ->get()
-        ->map(function ($package) use ($user) {
-            // How many shares user already purchased
-            $package->user_purchased = Investor::where('user_id', $user->id)
-                ->where('package_id', $package->id)
-                ->sum('quantity');
-            // How many more he can buy
-            $package->user_remaining = $package->per_purchase_limit - $package->user_purchased;
+        $packages = Package::where('status', 'active')
+            ->orderBy('id', 'ASC')
+            ->get()
+            ->map(function ($package) use ($user) {
 
-            if ($package->user_remaining < 0) $package->user_remaining = 0;
+                // User purchased shares (user-wise)
+                $package->user_purchased = Investor::where('user_id', $user->id)
+                    ->where('package_id', $package->id)
+                    ->sum('quantity');
 
-            return $package;
-        });
+                // User remaining limit
+                $package->user_remaining =
+                    $package->per_purchase_limit - $package->user_purchased;
 
-    return view('user.pages.package.index', compact('packages'));
-}
+                if ($package->user_remaining < 0) {
+                    $package->user_remaining = 0;
+                }
+
+                // 🔥 Total sold shares for this package
+                $totalSold = Investor::where('package_id', $package->id)
+                    ->sum('quantity');
+
+                // 🔥 Remaining shares for this package
+                $package->remaining_shares =
+                    $package->total_share_quantity - $totalSold;
+
+                if ($package->remaining_shares < 0) {
+                    $package->remaining_shares = 0;
+                }
+
+                return $package;
+            });
+
+        return view('user.pages.package.index', compact('packages'));
+    }
+
 
 
     // Purchase function

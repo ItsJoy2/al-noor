@@ -17,6 +17,26 @@
     <!-- favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
 </head>
+
+<style>
+    .card{
+        background-color: #191c2461;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.84);
+    }
+    .form-control {
+        background-color: #3d404b69;
+    }
+    .form-control:focus{
+        background-color: #2a303861;
+        border: 1px solid rgb(18 215 18 / 50%);
+    }
+    .form-check .form-check-label {
+        color: #cdcdcd;
+    }
+    .auth .sign-up a {
+        color: #d19d11;
+    }
+</style>
 <body>
     <div class="container-scroller">
         <div class="container-fluid page-body-wrapper full-page-wrapper">

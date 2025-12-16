@@ -201,7 +201,7 @@ class AuthServices
         'address'  => 'nullable|string|max:255',
         'image'    => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
         'birthday' => 'nullable|date',
-        'nid_or_passport' => 'nullable|string|max:15|min:10',
+        'nid_or_passport' => 'nullable|string|max:15|min:9',
     ]);
 
     if ($validator->fails()) {

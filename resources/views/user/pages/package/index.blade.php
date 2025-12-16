@@ -29,7 +29,20 @@
 
                                 <div class="stat-item">
                                     <span><i class="fas fa-layer-group"></i> Total Shares</span>
+                                    <span>20000 </span>
+                                </div>
+
+                                <div class="stat-item">
+                                    <span><i class="fas fa-boxes"></i> Share this Stage </span>
                                     <span>{{ $package->total_share_quantity }} </span>
+                                </div>
+
+                                <div class="stat-item">
+                                    <span><i class="fas fa-hourglass-half"></i> Remaining Shares</span>
+                                    <span
+                                        class="{{ $package->remaining_shares}}">
+                                        {{ $package->remaining_shares }}
+                                    </span>
                                 </div>
 
                                 <div class="stat-item">
