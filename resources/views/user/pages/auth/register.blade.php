@@ -19,7 +19,13 @@
     <!-- Layout styles -->
     <link rel="stylesheet" href="{{ asset('assets/user/css/style.css') }}">
     <!-- End layout styles -->
-    <link rel="shortcut icon" href="../../assets/images/favicon.png" />
+    @if($generalSettings && $generalSettings->favicon)
+        <link rel="icon" type="image/png" href="{{ asset('storage/' . $generalSettings->favicon) }}">
+        <link rel="apple-touch-icon" href="{{ asset('storage/' . $generalSettings->favicon) }}">
+    @else
+        <link rel="icon" type="image/png" href="{{ asset('default-favicon.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('default-favicon.png') }}">
+    @endif
   </head>
   <style>
     .card{
