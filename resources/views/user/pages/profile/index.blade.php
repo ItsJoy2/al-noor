@@ -120,14 +120,14 @@
                     <div class="text-center position-relative mb-4">
                         <label for="nomineeImageInput" class="cursor-pointer position-relative d-inline-block">
                             <img
-                                src="{{ isset($nominee) && $nominee->nominee_image ? asset('storage/' . $nominee->nominee_image) : url('/public/assets/user/images/nominee.jpg') }}"
+                                src="{{ isset($nominee) && $nominee->nominee_image ? asset('storage/' . $nominee->nominee_image) : url('../assets/user/images/nominee.jpg') }}"
                                 alt="Nominee Image"
                                 id="nomineePreview"
                                 class="shadow bg-secondary border border-info"
                                 width="130"
                                 height="130"
                                 style="object-fit: cover; border-width: 3px !important;"
-                                onerror="this.src='{{ url('assets/nominee-placeholder.png') }}'"
+                                onerror="this.src='{{ url('/public/assets/user/images/nominee.jpg') }}'"
                             >
                             <div class="position-absolute bg-dark text-white rounded-circle"
                                 style="bottom: 0; right: 0; padding: 3px 8px; cursor: pointer;">
