@@ -20195,7 +20195,7 @@ div.tagsinput {
 /* === Landing screens === */
 /* Auth */
 .auth.login-bg {
-  background: url("../images/auth/Login_bg.jpg");
+  background: url("../images/auth/Login_bg.jpg") no-repeat center center;
   background-size: cover; }
 
 .auth .login-half-bg {
@@ -20491,7 +20491,7 @@ div.tagsinput {
           .navbar .navbar-menu-wrapper .navbar-nav .nav-item .nav-link {
             margin-left: .8rem;
             margin-right: .8rem; } }
-        .navbar .navbar-menu-wrapper .navbar-nav .nav-item .nav-link i {
+            .navbar .navbar-menu-wrapper .navbar-nav .nav-item .nav-link i {
           font-size: 1.125rem; }
         .navbar .navbar-menu-wrapper .navbar-nav .nav-item .nav-link .navbar-profile {
           display: flex;
