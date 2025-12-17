@@ -120,7 +120,7 @@
                     <div class="text-center position-relative mb-4">
                         <label for="nomineeImageInput" class="cursor-pointer position-relative d-inline-block">
                             <img
-                                src="{{ isset($nominee) && $nominee->image ? asset('storage/' . $nominee->image) : url('assets/nominee-placeholder.png') }}"
+                                src="{{ isset($nominee) && $nominee->nominee_image ? asset('storage/' . $nominee->nominee_image) : url('assets/nominee-placeholder.png') }}"
                                 alt="Nominee Image"
                                 id="nomineePreview"
                                 class="shadow bg-secondary border border-info"
@@ -265,7 +265,8 @@
                 reader.readAsDataURL(file);
             }
         });
-
+    </script>
+    <script>
         document.getElementById('nomineeImageInput')?.addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (file) {
@@ -277,6 +278,4 @@
             }
         });
     </script>
-
-
 @endpush

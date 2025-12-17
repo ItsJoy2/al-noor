@@ -160,7 +160,7 @@ public function registerForm() :View
             'sex' => 'required|in:male,female,other',
             'relationship' => 'required|string|max:100',
             'birth_registration_or_nid' => 'required|string',
-            'nominee_image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'nominee_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $user = auth()->user();
@@ -169,14 +169,16 @@ public function registerForm() :View
             ->where('birth_registration_or_nid', $request->birth_registration_or_nid)
             ->first();
 
-        $imagePath = $nominee?->image;
+        $imagePath = $nominee?->nominee_image;
 
         if ($request->hasFile('nominee_image')) {
+
             if ($imagePath && Storage::disk('public')->exists($imagePath)) {
                 Storage::disk('public')->delete($imagePath);
             }
 
-            $imagePath = $request->file('nominee_image')->store('nominees', 'public');
+            $imagePath = $request->file('nominee_image')
+                ->store('nominees', 'public');
         }
 
         $user->nominees()->updateOrCreate(
@@ -186,10 +188,10 @@ public function registerForm() :View
                 'date_of_birth' => $request->date_of_birth,
                 'sex' => $request->sex,
                 'relationship' => $request->relationship,
-                'image' => $imagePath,
+                'nominee_image' => $imagePath,
             ]
         );
 
-        return back()->with('success', 'Nominee saved successfully.');
+        return back()->with('success', 'Nominee updated successfully.');
     }
 }
