@@ -160,7 +160,7 @@ public function registerForm() :View
             'sex' => 'required|in:male,female,other',
             'relationship' => 'required|string|max:100',
             'birth_registration_or_nid' => 'required|string',
-            'nominee_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'nominee_image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $user = auth()->user();
