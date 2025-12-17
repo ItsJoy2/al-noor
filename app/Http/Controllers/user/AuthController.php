@@ -154,31 +154,28 @@ public function registerForm() :View
 
     public function nominee(Request $request)
     {
-        $request->validate([
-            'nominee_name' => 'required|string|max:255',
-            'date_of_birth' => 'required|date',
-            'sex' => 'required|in:male,female,other',
-            'relationship' => 'required|string|max:100',
-            'birth_registration_or_nid' => 'required|string',
-            'nominee_image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
-
         $user = auth()->user();
 
         $nominee = $user->nominees()
             ->where('birth_registration_or_nid', $request->birth_registration_or_nid)
             ->first();
 
+        $request->validate([
+            'nominee_name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date',
+            'sex' => 'required|in:male,female,other',
+            'relationship' => 'required|string|max:100',
+            'birth_registration_or_nid' => 'required|string',
+            'nominee_image' => $nominee && $nominee->nominee_image ? 'nullable|image|mimes:jpg,jpeg,png|max:2048' : 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
         $imagePath = $nominee?->nominee_image;
 
         if ($request->hasFile('nominee_image')) {
-
             if ($imagePath && Storage::disk('public')->exists($imagePath)) {
                 Storage::disk('public')->delete($imagePath);
             }
-
-            $imagePath = $request->file('nominee_image')
-                ->store('nominees', 'public');
+            $imagePath = $request->file('nominee_image')->store('nominees', 'public');
         }
 
         $user->nominees()->updateOrCreate(
@@ -194,4 +191,5 @@ public function registerForm() :View
 
         return back()->with('success', 'Nominee updated successfully.');
     }
+
 }
