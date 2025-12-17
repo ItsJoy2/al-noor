@@ -13,6 +13,7 @@ class Nominee extends Model
     protected $fillable = [
         'user_id',
         'nominee_name',
+        'nominee_image',
         'date_of_birth',
         'sex',
         'relationship',

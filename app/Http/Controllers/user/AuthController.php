@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -151,7 +152,7 @@ public function registerForm() :View
         ]);
     }
 
-        public function nominee(Request $request)
+    public function nominee(Request $request)
     {
         $request->validate([
             'nominee_name' => 'required|string|max:255',
@@ -159,21 +160,36 @@ public function registerForm() :View
             'sex' => 'required|in:male,female,other',
             'relationship' => 'required|string|max:100',
             'birth_registration_or_nid' => 'required|string',
+            'nominee_image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $user = auth()->user();
 
+        $nominee = $user->nominees()
+            ->where('birth_registration_or_nid', $request->birth_registration_or_nid)
+            ->first();
+
+        $imagePath = $nominee?->image;
+
+        if ($request->hasFile('nominee_image')) {
+            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            $imagePath = $request->file('nominee_image')->store('nominees', 'public');
+        }
+
         $user->nominees()->updateOrCreate(
             ['birth_registration_or_nid' => $request->birth_registration_or_nid],
-            $request->only([
-                'nominee_name',
-                'date_of_birth',
-                'sex',
-                'relationship'
-            ])
+            [
+                'nominee_name' => $request->nominee_name,
+                'date_of_birth' => $request->date_of_birth,
+                'sex' => $request->sex,
+                'relationship' => $request->relationship,
+                'image' => $imagePath,
+            ]
         );
 
         return back()->with('success', 'Nominee saved successfully.');
     }
-
 }
