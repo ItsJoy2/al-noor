@@ -120,7 +120,7 @@
                     <div class="text-center position-relative mb-4">
                         <label for="nomineeImageInput" class="cursor-pointer position-relative d-inline-block">
                             <img
-                                src="{{ isset($nominee) && $nominee->nominee_image ? asset('storage/' . $nominee->nominee_image) : url('assets/nominee-placeholder.png') }}"
+                                src="{{ isset($nominee) && $nominee->nominee_image ? asset('storage/' . $nominee->nominee_image) : url('/public/assets/user/images/nominee.jpg') }}"
                                 alt="Nominee Image"
                                 id="nomineePreview"
                                 class="shadow bg-secondary border border-info"
