@@ -29,12 +29,13 @@
   </head>
   <style>
     .card{
-        background-color: #191c2461;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.84);
+        background-color: #5353533b;
+        box-shadow: 0 4px 12px rgba(0, 0, 0);
     }
     .form-control {
-        background-color: #3d404b69;
+        background-color: #70737f69;
     }
+
     .form-control:focus{
         background-color: #2a303861;
         border: 1px solid rgb(18 215 18 / 50%);
@@ -45,6 +46,27 @@
     .auth .sign-up a {
         color: #d19d11;
     }
+    .input-group-text.password-eye {
+        background-color: #70737f69;
+        border: none;
+        cursor: pointer;
+    }
+
+    .input-group-text.password-eye i {
+        color: #ccc;
+        font-size: 18px;
+    }
+
+    .input-group-text.password-eye:hover i {
+        color: #fff;
+    }
+
+    /* input focus sync */
+    .form-control:focus + .input-group-append .password-eye {
+        background-color: #2a303861;
+    }
+
+
 </style>
   <body>
     <div class="container-scroller">
@@ -76,14 +98,40 @@
                     </div>
                     <div class="form-group">
                         <label>Password</label>
-                        <input type="password" class="form-control text-white p_input" name="password">
+                        <div class="input-group">
+                            <input type="password"
+                                id="password"
+                                class="form-control text-white p_input"
+                                name="password">
+
+                            <div class="input-group-append">
+                                <span class="input-group-text password-eye"
+                                    onclick="togglePassword('password', this)">
+                                    <i class="mdi mdi-eye-off"></i>
+                                </span>
+                            </div>
+                        </div>
                         @error('password') <small class="text-danger">{{ $message }}</small> @enderror
                     </div>
 
+
                     <div class="form-group">
                         <label>Confirm Password</label>
-                        <input type="password" class="form-control text-white p_input" name="password_confirmation">
+                        <div class="input-group">
+                            <input type="password"
+                                id="password_confirmation"
+                                class="form-control text-white p_input"
+                                name="password_confirmation">
+
+                            <div class="input-group-append">
+                                <span class="input-group-text password-eye"
+                                    onclick="togglePassword('password_confirmation', this)">
+                                    <i class="mdi mdi-eye-off"></i>
+                                </span>
+                            </div>
+                        </div>
                     </div>
+
 
                     <div class="form-group">
                         <label>Referral Code (optional)</label>
@@ -137,6 +185,23 @@
         }
     });
     </script>
+    <script>
+        function togglePassword(inputId, el) {
+            const input = document.getElementById(inputId);
+            const icon = el.querySelector('i');
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("mdi-eye-off");
+                icon.classList.add("mdi-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("mdi-eye");
+                icon.classList.add("mdi-eye-off");
+            }
+        }
+    </script>
+
 
     <!-- endinject -->
   </body>

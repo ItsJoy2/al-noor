@@ -26,11 +26,11 @@
 
 <style>
     .card{
-        background-color: #191c2461;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.84);
+        background-color: #5353533b;
+        box-shadow: 0 4px 12px rgba(0, 0, 0);
     }
     .form-control {
-        background-color: #3d404b69;
+        background-color: #70737f69;
     }
     .form-control:focus{
         background-color: #2a303861;
@@ -42,6 +42,37 @@
     .auth .sign-up a {
         color: #d19d11;
     }
+    .input-group-text.password-eye {
+        background-color: #70737f69;
+        border: none;
+        cursor: pointer;
+    }
+
+    .input-group-text.password-eye i {
+        color: #ccc;
+        font-size: 18px;
+    }
+
+    .input-group-text.password-eye:hover i {
+        color: #fff;
+    }
+
+    /* focus time input + icon sync */
+    .form-control:focus + .input-group-append .password-eye {
+        background-color: #2a303861;
+    }
+    .forgot-pass {
+    font-size: 13px;
+    color: #d19d11;
+    text-decoration: none;
+}
+
+.forgot-pass:hover {
+    text-decoration: underline;
+    color: #ffd45a;
+}
+
+
 </style>
 <body>
     <div class="container-scroller">
@@ -87,9 +118,31 @@
 
                                 <div class="form-group">
                                     <label for="password">Password *</label>
-                                    <input type="password" name="password" id="password"
-                                           class="form-control text-white p_input" required>
+
+                                    <div class="input-group">
+                                        <input type="password"
+                                            name="password"
+                                            id="password"
+                                            class="form-control text-white p_input"
+                                            required>
+
+                                        <div class="input-group-append">
+                                            <span class="input-group-text password-eye"
+                                                onclick="togglePassword('password', this)">
+                                                <i class="mdi mdi-eye-off"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {{-- <div class="text-right mt-1">
+                                        <a href=""
+                                        class="forgot-pass">
+                                            Forgot password?
+                                        </a>
+                                    </div> --}}
                                 </div>
+
+
 
                                 <div class="form-group d-flex align-items-center justify-content-between">
                                     <div class="form-check">
@@ -99,7 +152,7 @@
                                             Remember me
                                         </label>
                                     </div>
-                                    {{-- <a href="{{ route('password.request') }}" class="forgot-pass">Forgot password</a> --}}
+
                                 </div>
 
                                 <div class="text-center">
@@ -135,5 +188,22 @@
     <script src="{{ asset('assets/user/js/misc.js') }}"></script>
     <script src="{{ asset('assets/user/js/settings.js') }}"></script>
     <script src="{{ asset('assets/user/js/todolist.js') }}"></script>
+    <script>
+        function togglePassword(inputId, el) {
+            const input = document.getElementById(inputId);
+            const icon = el.querySelector('i');
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("mdi-eye-off");
+                icon.classList.add("mdi-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("mdi-eye");
+                icon.classList.add("mdi-eye-off");
+            }
+        }
+    </script>
+
 </body>
 </html>
