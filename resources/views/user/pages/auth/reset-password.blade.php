@@ -92,8 +92,7 @@
                         <form method="POST" action="{{ route('reset.password') }}">
                             @csrf
 
-                            <input type="hidden" name="email"
-                                   value="{{ old('email', request('email')) }}" readonly>
+                            <input type="hidden" name="email" value="{{ session('email') }}">
 
                             {{-- Verification Code --}}
                             <div class="form-group">

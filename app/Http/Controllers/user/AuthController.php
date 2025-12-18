@@ -97,8 +97,9 @@ public function registerForm() :View
         });
 
         return redirect()
-            ->route('password.verify')
-            ->with('success', 'Verification code sent! Please check your email.');
+    ->route('password.verify', ['email' => $request->email])
+ ->with(['success' => 'Verification code sent! Please check your email.', 'email' => $request->email]);
+
     }
 
     public function passwordVerify()
