@@ -60,96 +60,91 @@ public function registerForm() :View
     {
         return $this->authServices->changePassword($request);
     }
-
+    public function forgotPassword() :View
+    {
+        return view ('user.pages.auth.forget-password');
+    }
     public function ForgotPasswordSendEmail(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
         ]);
 
-        $email = $request->input("email");
-        $user = User::where('email', $email)->first();
+        $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return response()->json([
-                "status" => false,
-                "message" => "User not found"
-            ], 404);
+            return back()->withErrors([
+                'email' => 'User not found with this email address'
+            ])->withInput();
         }
 
-
-        $code = rand(100000, 999999);
+        $code = random_int(100000, 999999);
 
         DB::table('password_resets')->updateOrInsert(
-            ['email' => $email],
+            ['email' => $request->email],
             [
                 'token' => $code,
-                'created_at' => Carbon::now()
+                'created_at' => now()
             ]
         );
 
-        // Send Email
-        Mail::send('mail.Forgotpassword', ['user' => $user, 'code' => $code], function ($m) use ($user) {
-            $m->to($user->email, $user->name)->subject('Your Password Reset Code');
+        Mail::send('mail.Forgotpassword', [
+            'user' => $user,
+            'code' => $code
+        ], function ($m) use ($user) {
+            $m->to($user->email, $user->name)
+            ->subject('Your Password Reset Code');
         });
 
-        return response()->json([
-            "status" => true,
-            "message" => "Verification code sent to email"
-        ]);
+        return redirect()
+            ->route('password.verify')
+            ->with('success', 'Verification code sent! Please check your email.');
     }
 
-
+    public function passwordVerify()
+    {
+        return view ('user.pages.auth.reset-password');
+    }
 
     public function ResetPassword(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
             'code' => 'required|digits:6',
-            'password' => 'required|min:6'
+            'password' => 'required|min:6|confirmed',
         ]);
 
-        $email = $request->email;
-        $code = $request->code;
-
         $record = DB::table('password_resets')
-            ->where('email', $email)
-            ->where('token', $code)
+            ->where('email', $request->email)
+            ->where('token', $request->code)
             ->first();
 
         if (!$record) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid code'
-            ], 400);
+            return back()->withErrors([
+                'code' => 'Invalid verification code'
+            ])->withInput();
         }
 
         if (Carbon::parse($record->created_at)->addMinutes(10)->isPast()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Code expired'
-            ], 400);
+            return back()->withErrors([
+                'code' => 'Verification code expired'
+            ])->withInput();
         }
 
-        $user = User::where('email', $email)->first();
+        $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'User not found'
-            ], 404);
+            return back()->withErrors([
+                'email' => 'User not found'
+            ])->withInput();
         }
-
-        // Update password
         $user->password = Hash::make($request->password);
         $user->save();
 
-        // Optionally remove reset token
-        DB::table('password_resets')->where('email', $email)->delete();
+        DB::table('password_resets')->where('email', $request->email)->delete();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Password reset successfully'
-        ]);
+        return redirect()
+            ->route('login')
+            ->with('success', 'Password reset successfully. Please login.');
     }
 
     public function nominee(Request $request)

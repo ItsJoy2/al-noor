@@ -134,12 +134,12 @@
                                         </div>
                                     </div>
 
-                                    {{-- <div class="text-right mt-1">
-                                        <a href=""
+                                    <div class="text-right mt-1">
+                                        <a href="{{ route('forgot.password') }}"
                                         class="forgot-pass">
                                             Forgot password?
                                         </a>
-                                    </div> --}}
+                                    </div>
                                 </div>
 
 
