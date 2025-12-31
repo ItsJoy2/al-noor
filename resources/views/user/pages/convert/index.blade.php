@@ -22,7 +22,7 @@
                 @include('user.layouts.alert')
 
                 {{-- Convert Form --}}
-                <form class="forms-sample" method="POST" action="{{ route('user.wallet.convert') }}">
+                <form class="forms-sample" method="POST" action="{{ route('user.wallet.convert') }}" id="depositForm">
                     @csrf
 
                     {{-- Wallet Info --}}
@@ -62,7 +62,7 @@
                     </div>
 
                     {{-- Submit --}}
-                    <button type="submit" class="btn btn-success mr-2">
+                    <button type="submit" class="btn btn-success mr-2" id="submitBtn">
                         <i class="fas fa-exchange-alt me-1"></i> Convert Now
                     </button>
                     <a href="{{ url()->previous() }}" class="btn btn-dark">Cancel</a>
@@ -73,3 +73,16 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+
+<script>
+    document.getElementById('depositForm').addEventListener('submit', function () {
+        const btn = document.getElementById('submitBtn');
+
+        btn.disabled = true;
+        btn.innerHTML = 'Converting...';
+    });
+</script>
+
+@endpush

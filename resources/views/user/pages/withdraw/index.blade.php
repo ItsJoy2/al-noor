@@ -30,7 +30,7 @@
                     </div>
                 @endif
 
-                <form class="forms-sample" method="POST" action="{{ route('user.withdraw.submit') }}">
+                <form class="forms-sample" method="POST" action="{{ route('user.withdraw.submit') }}" id="depositForm">
                     @csrf
 
                     <div class="form-group">
@@ -88,7 +88,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary mr-2">Submit</button>
+                    <button type="submit" class="btn btn-primary mr-2" id="submitBtn">Submit</button>
                     <a href="{{ url()->previous() }}" class="btn btn-dark">Cancel</a>
                 </form>
             </div>
@@ -112,5 +112,12 @@
 
     document.getElementById('method').addEventListener('change', toggleFields);
     window.addEventListener('load', toggleFields);
+
+    document.getElementById('depositForm').addEventListener('submit', function () {
+        const btn = document.getElementById('submitBtn');
+
+        btn.disabled = true;
+        btn.innerHTML = 'Submitting...';
+    });
 </script>
 @endsection

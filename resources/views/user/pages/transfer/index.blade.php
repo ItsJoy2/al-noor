@@ -22,7 +22,7 @@
                 @include('user.layouts.alert')
 
                 {{-- Transfer Form --}}
-                <form class="forms-sample" method="POST" action="{{ route('user.transfer.submit') }}">
+                <form class="forms-sample" method="POST" action="{{ route('user.transfer.submit') }}" id="depositForm">
                     @csrf
 
                     {{-- Wallet Info --}}
@@ -69,7 +69,7 @@
                     </div>
 
                     {{-- Submit --}}
-                    <button type="submit" class="btn btn-primary mr-2">Submit</button>
+                    <button type="submit" class="btn btn-primary mr-2" id="submitBtn">Submit</button>
                     <a href="{{ url()->previous() }}" class="btn btn-dark">Cancel</a>
                 </form>
 
@@ -78,3 +78,16 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+
+<script>
+    document.getElementById('depositForm').addEventListener('submit', function () {
+        const btn = document.getElementById('submitBtn');
+
+        btn.disabled = true;
+        btn.innerHTML = 'Submitting...';
+    });
+</script>
+
+@endpush

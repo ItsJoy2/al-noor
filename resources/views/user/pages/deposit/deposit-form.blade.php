@@ -18,7 +18,7 @@
         <h4 class="card-title">Deposit Form</h4>
         <p>Select a payment method & complete your deposit.</p>
 
-        <form class="forms-sample" method="POST" action="{{ route('user.deposit.store') }}">
+        <form class="forms-sample" method="POST" action="{{ route('user.deposit.store') }}" id="depositForm">
         @csrf
 
           {{-- Select Wallet --}}
@@ -63,7 +63,7 @@
             <input type="text" class="form-control bg-transparent text-light border" name="transaction_id" placeholder="Enter transaction ID" required>
           </div>
 
-          <button type="submit" class="btn btn-primary mr-2">Submit</button>
+          <button type="submit" class="btn btn-primary mr-2" id="submitBtn">Submit</button>
           <button type="reset" class="btn btn-dark">Cancel</button>
 
         </form>
@@ -78,83 +78,91 @@
 
 
 <script>
-// SHOW PAYMENT DETAILS + COPY ICON
-const methodSelect = document.getElementById('methodSelect');
-const methodDetailsBox = document.getElementById('methodDetailsBox');
+    // SHOW PAYMENT DETAILS + COPY ICON
+    const methodSelect = document.getElementById('methodSelect');
+    const methodDetailsBox = document.getElementById('methodDetailsBox');
 
-methodSelect.addEventListener('change', function () {
-    let details = this.selectedOptions[0].getAttribute('data-details');
+    methodSelect.addEventListener('change', function () {
+        let details = this.selectedOptions[0].getAttribute('data-details');
 
-    if(details) {
-        details = JSON.parse(details);
+        if(details) {
+            details = JSON.parse(details);
 
-        let html = "<strong>Payment Details:</strong><br><br>";
+            let html = "<strong>Payment Details:</strong><br><br>";
 
-        for (const key in details) {
-            let label = key.replace('_', ' ').toUpperCase();
+            for (const key in details) {
+                let label = key.replace('_', ' ').toUpperCase();
 
-            // ONLY these fields get COPY BUTTON
-            if (
-                key === "account" ||
-                key === "account_number" ||
-                key === "wallet_address"
-            ) {
+                // ONLY these fields get COPY BUTTON
+                if (
+                    key === "account" ||
+                    key === "account_number" ||
+                    key === "wallet_address"
+                ) {
 
-                html += `
-                    <div class="d-flex align-items-center mb-2">
-                        <span id="${key}_text">${label}: <strong>${details[key]}</strong></span>
+                    html += `
+                        <div class="d-flex align-items-center mb-2">
+                            <span id="${key}_text">${label}: <strong>${details[key]}</strong></span>
 
-                        <button type="button" class="btn btn-sm ml-2 copy-btn"
-                            data-copy-target="${key}_text">
-                            <i class="fa-solid fa-copy text-success"></i>
-                        </button>
-                    </div>
-                `;
+                            <button type="button" class="btn btn-sm ml-2 copy-btn"
+                                data-copy-target="${key}_text">
+                                <i class="fa-solid fa-copy text-success"></i>
+                            </button>
+                        </div>
+                    `;
 
-            } else {
-                // NO COPY BUTTON
-                html += `
-                    <div class="mb-2">
-                        ${label}: <strong>${details[key]}</strong>
-                    </div>
-                `;
+                } else {
+                    // NO COPY BUTTON
+                    html += `
+                        <div class="mb-2">
+                            ${label}: <strong>${details[key]}</strong>
+                        </div>
+                    `;
+                }
             }
+
+            methodDetailsBox.innerHTML = html;
+            methodDetailsBox.classList.remove('d-none');
+
+            activateCopyButtons();
         }
-
-        methodDetailsBox.innerHTML = html;
-        methodDetailsBox.classList.remove('d-none');
-
-        activateCopyButtons();
-    }
-    else {
-        methodDetailsBox.classList.add('d-none');
-    }
-});
+        else {
+            methodDetailsBox.classList.add('d-none');
+        }
+    });
 
 
-// COPY FUNCTION
-function activateCopyButtons() {
-    const buttons = document.querySelectorAll('.copy-btn');
+    // COPY FUNCTION
+    function activateCopyButtons() {
+        const buttons = document.querySelectorAll('.copy-btn');
 
-    buttons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const target = this.getAttribute('data-copy-target');
-            const fullText = document.getElementById(target).innerText;
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const target = this.getAttribute('data-copy-target');
+                const fullText = document.getElementById(target).innerText;
 
-            // Remove the label part — only copy the number / address
-            const text = fullText.split(":").slice(1).join(":").trim();
+                // Remove the label part — only copy the number / address
+                const text = fullText.split(":").slice(1).join(":").trim();
 
-            navigator.clipboard.writeText(text).then(() => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Copied!',
-                    text: 'Copied to clipboard.',
-                    timer: 1500,
-                    showConfirmButton: false
+                navigator.clipboard.writeText(text).then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Copied!',
+                        text: 'Copied to clipboard.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                 });
             });
         });
+    }
+
+    document.getElementById('depositForm').addEventListener('submit', function () {
+        const btn = document.getElementById('submitBtn');
+
+        btn.disabled = true;
+        btn.innerHTML = 'Submitting...';
     });
-}
+
 </script>
 @endpush
