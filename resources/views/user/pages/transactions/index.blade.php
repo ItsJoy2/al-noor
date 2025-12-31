@@ -20,10 +20,10 @@
         <form method="GET" action="{{ route('user.transactions') }}" class="form-inline mb-3">
             <div class="form-group mr-2">
                 <label for="keyword" class="mr-2">Filter by Remark:</label>
-                <select name="keyword" id="keyword" class="form-control">
+                <select name="keyword" id="keyword" class="form-control text-white">
                     <option value="">-- All --</option>
                     @foreach (['transfer', 'convert', 'level_bonus', 'director_bonus', 'shareholder_bonus', 'club_bonus', 'rank_bonus'] as $remark)
-                        <option value="{{ $remark }}" {{ ($keyword ?? '') == $remark ? 'selected' : '' }}>
+                        <option class="text-white" value="{{ $remark }}" {{ ($keyword ?? '') == $remark ? 'selected' : '' }}>
                             {{ ucfirst(str_replace('_',' ',$remark)) }}
                         </option>
                     @endforeach
